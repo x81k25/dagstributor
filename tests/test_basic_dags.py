@@ -1,35 +1,30 @@
-"""Tests for basic DAGs to verify repository functionality."""
+"""Tests for modernized asset-based workflows."""
 
 import pytest
-from dagster import materialize, materialize_to_memory
+from dagster import materialize_to_memory
 
-from dags.basic_math_dag import (
-    basic_math_job,
+from dagstributor.assets import (
+    # Basic math assets
     random_dataset,
     dataset_stats,
-    dataset_analysis
-)
-from dags.string_processing_dag import (
-    string_processing_job,
+    dataset_analysis,
+    # String processing assets
     raw_messages,
     processed_messages,
-    message_summary
-)
-from dags.simple_workflow_dag import (
-    simple_workflow_job,
+    message_summary,
+    # Workflow assets
     workflow_metadata,
     execution_context,
-    execution_report
+    execution_report,
+    # Example assets
+    raw_data,
+    processed_data
 )
+from dagstributor.definitions import defs
 
 
-class TestBasicMathDAG:
-    """Test basic math DAG functionality."""
-    
-    def test_basic_math_job_execution(self):
-        """Test that basic math job executes successfully."""
-        result = basic_math_job.execute_in_process()
-        assert result.success
+class TestBasicMathAssets:
+    """Test basic math assets functionality."""
     
     def test_random_dataset_asset(self):
         """Test random dataset asset creation."""
@@ -50,15 +45,20 @@ class TestBasicMathDAG:
         assert "sum" in stats
         assert "average" in stats
         assert stats["count"] == 10
-
-
-class TestStringProcessingDAG:
-    """Test string processing DAG functionality."""
     
-    def test_string_processing_job_execution(self):
-        """Test that string processing job executes successfully."""
-        result = string_processing_job.execute_in_process()
+    def test_dataset_analysis_asset(self):
+        """Test dataset analysis calculation."""
+        result = materialize_to_memory([random_dataset, dataset_stats, dataset_analysis])
         assert result.success
+        analysis = result.output_for_node("dataset_analysis")
+        assert isinstance(analysis, dict)
+        assert "range" in analysis
+        assert "above_average" in analysis
+        assert "variance_indicator" in analysis
+
+
+class TestStringProcessingAssets:
+    """Test string processing assets functionality."""
     
     def test_raw_messages_asset(self):
         """Test raw messages asset creation."""
@@ -78,15 +78,20 @@ class TestStringProcessingDAG:
         assert len(processed) == 7
         assert all("message" in item for item in processed)
         assert all("word_count" in item for item in processed)
-
-
-class TestSimpleWorkflowDAG:
-    """Test simple workflow DAG functionality."""
     
-    def test_simple_workflow_job_execution(self):
-        """Test that simple workflow job executes successfully."""
-        result = simple_workflow_job.execute_in_process()
+    def test_message_summary_asset(self):
+        """Test message summary functionality."""
+        result = materialize_to_memory([raw_messages, processed_messages, message_summary])
         assert result.success
+        summary = result.output_for_node("message_summary")
+        assert isinstance(summary, dict)
+        assert "total_messages" in summary
+        assert "total_words" in summary
+        assert summary["total_messages"] == 7
+
+
+class TestWorkflowAssets:
+    """Test workflow assets functionality."""
     
     def test_workflow_metadata_asset(self):
         """Test workflow metadata asset creation."""
@@ -124,12 +129,32 @@ class TestSimpleWorkflowDAG:
         assert report["status"] == "success"
 
 
-class TestRepositoryIntegration:
-    """Test repository-level integration."""
+class TestExampleAssets:
+    """Test example assets functionality."""
+    
+    def test_raw_data_asset(self):
+        """Test raw data asset creation."""
+        result = materialize_to_memory([raw_data])
+        assert result.success
+        data = result.output_for_node("raw_data")
+        assert data == [1, 2, 3, 4, 5]
+    
+    def test_processed_data_asset(self):
+        """Test processed data asset creation."""
+        result = materialize_to_memory([raw_data, processed_data])
+        assert result.success
+        data = result.output_for_node("processed_data")
+        assert data == [2, 4, 6, 8, 10]
+
+
+class TestDefinitionsIntegration:
+    """Test definitions-level integration."""
     
     def test_all_assets_can_materialize(self):
         """Test that all assets can be materialized together."""
         all_assets = [
+            # Example assets
+            raw_data, processed_data,
             # Basic math assets
             random_dataset, dataset_stats, dataset_analysis,
             # String processing assets
@@ -141,19 +166,18 @@ class TestRepositoryIntegration:
         result = materialize_to_memory(all_assets)
         assert result.success
     
-    def test_repository_contains_all_jobs(self):
-        """Test that repository contains all expected jobs."""
-        from repositories.main import dagstributor_repository
+    def test_definitions_contains_all_assets(self):
+        """Test that definitions contains all expected assets."""
+        asset_names = [asset.key.to_user_string() for asset in defs.assets]
         
-        repo = dagstributor_repository
-        job_names = [job.name for job in repo.get_all_jobs()]
-        
-        expected_jobs = [
-            "example_dag",
-            "basic_math_job", 
-            "string_processing_job",
-            "simple_workflow_job"
+        expected_assets = [
+            "raw_data", "processed_data",
+            "random_dataset", "dataset_stats", "dataset_analysis",
+            "raw_messages", "processed_messages", "message_summary",
+            "workflow_metadata", "execution_context", "execution_report"
         ]
         
-        for expected_job in expected_jobs:
-            assert expected_job in job_names
+        for expected_asset in expected_assets:
+            assert expected_asset in asset_names
+        
+        assert len(asset_names) == 11
