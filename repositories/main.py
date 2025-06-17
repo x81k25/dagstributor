@@ -55,4 +55,4 @@ def dagstributor_repo():
         download_check_schedule,
         transfer_schedule,
         cleanup_schedule,
-    ] + defs.get_all_asset_checks() + defs.get_all_job_definitions() + list(defs.get_all_asset_specs())
+    ]
