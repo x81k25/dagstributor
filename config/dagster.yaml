@@ -3,8 +3,13 @@ scheduler:
   class: DagsterDaemonScheduler
 
 run_launcher:
-  module: dagster.core.launcher
-  class: DefaultRunLauncher
+  module: dagster_k8s
+  class: K8sRunLauncher
+  config:
+    service_account_name: dagster
+    job_namespace: orchestration
+    load_incluster_config: true
+    job_image: dagster/dagster-k8s:1.5.5
 
 storage:
   postgres:
