@@ -2,8 +2,8 @@
 
 from dagster import repository
 
-from ..dagstributor.definitions import defs
-from ..dagstributor.automatic_transmission.jobs import (
+from dagstributor.definitions import defs
+from dagstributor.automatic_transmission.jobs import (
     rss_ingest_job,
     collect_job,
     parse_job,
@@ -15,7 +15,7 @@ from ..dagstributor.automatic_transmission.jobs import (
     transfer_job,
     cleanup_job,
 )
-from ..dagstributor.automatic_transmission.schedules import (
+from dagstributor.automatic_transmission.schedules import (
     rss_ingest_schedule,
     collect_schedule,
     parse_schedule,
