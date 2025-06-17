@@ -1,0 +1,27 @@
+scheduler:
+  module: dagster.core.scheduler
+  class: DagsterDaemonScheduler
+
+run_launcher:
+  module: dagster_k8s
+  class: K8sRunLauncher
+  config:
+    service_account_name: dagster
+    job_namespace: orchestration
+    load_incluster_config: true
+    job_image: dagster/dagster-k8s:1.5.5
+
+storage:
+  postgres:
+    postgres_db:
+      username: dagster
+      password: dagster
+      hostname: localhost
+      db_name: dagster
+      port: 5432
+
+compute_logs:
+  module: dagster.core.storage.logs
+  class: DefaultComputeLogManager
+  config:
+    base_dir: ./logs
