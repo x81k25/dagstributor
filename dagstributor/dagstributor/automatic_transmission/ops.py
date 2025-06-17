@@ -5,92 +5,92 @@ from dagster import op, OpExecutionContext
 from dagster_k8s import k8s_job_op
 
 
-rss_ingest_op = k8s_job_op.configured(
+at_01_rss_ingest_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-rss-ingest:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-01-rss-ingest:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="rss_ingest_op"
+    name="at_01_rss_ingest_op"
 )
 
-collect_op = k8s_job_op.configured(
+at_02_collect_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-collect:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-02-collect:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="collect_op"
+    name="at_02_collect_op"
 )
 
-parse_op = k8s_job_op.configured(
+at_03_parse_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-parse:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-03-parse:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="parse_op"
+    name="at_03_parse_op"
 )
 
-file_filtration_op = k8s_job_op.configured(
+at_04_file_filtration_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-file-filtration:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-04-file-filtration:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="file_filtration_op"
+    name="at_04_file_filtration_op"
 )
 
-metadata_collection_op = k8s_job_op.configured(
+at_05_metadata_collection_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-metadata-collection:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-05-metadata-collection:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="metadata_collection_op"
+    name="at_05_metadata_collection_op"
 )
 
-media_filtration_op = k8s_job_op.configured(
+at_06_media_filtration_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-media-filtration:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-06-media-filtration:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="media_filtration_op"
+    name="at_06_media_filtration_op"
 )
 
-initiation_op = k8s_job_op.configured(
+at_07_initiation_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-initiation:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-07-initiation:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="initiation_op"
+    name="at_07_initiation_op"
 )
 
-download_check_op = k8s_job_op.configured(
+at_08_download_check_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-download-check:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-08-download-check:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="download_check_op"
+    name="at_08_download_check_op"
 )
 
-transfer_op = k8s_job_op.configured(
+at_09_transfer_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-transfer:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="transfer_op"
+    name="at_09_transfer_op"
 )
 
-cleanup_op = k8s_job_op.configured(
+at_10_cleanup_op = k8s_job_op.configured(
     {
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-cleanup:{os.getenv('ENVIRONMENT', 'latest')}",
+        "image": f"ghcr.io/x81k25/automatic-transmission/at-10-cleanup:{os.getenv('ENVIRONMENT', 'latest')}",
         "env_config_maps": ["dagster-pipeline-env"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     },
-    name="cleanup_op"
+    name="at_10_cleanup_op"
 )
