@@ -5,7 +5,7 @@ from dagster import op, OpExecutionContext
 from dagster_k8s import k8s_job_op
 
 
-rss_ingest_op = k8s_job_op.configured(
+at_01_rss_ingest_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-01-rss-ingest:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -13,10 +13,10 @@ rss_ingest_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="rss_ingest_op"
+    name="at_01_rss_ingest_op"
 )
 
-collect_op = k8s_job_op.configured(
+at_02_collect_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-02-collect:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -24,10 +24,10 @@ collect_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="collect_op"
+    name="at_02_collect_op"
 )
 
-parse_op = k8s_job_op.configured(
+at_03_parse_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-03-parse:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -35,10 +35,10 @@ parse_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="parse_op"
+    name="at_03_parse_op"
 )
 
-file_filtration_op = k8s_job_op.configured(
+at_04_file_filtration_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-04-file-filtration:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -46,10 +46,10 @@ file_filtration_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="file_filtration_op"
+    name="at_04_file_filtration_op"
 )
 
-metadata_collection_op = k8s_job_op.configured(
+at_05_metadata_collection_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-05-metadata-collection:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -57,10 +57,10 @@ metadata_collection_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="metadata_collection_op"
+    name="at_05_metadata_collection_op"
 )
 
-media_filtration_op = k8s_job_op.configured(
+at_06_media_filtration_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-06-media-filtration:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -68,10 +68,10 @@ media_filtration_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="media_filtration_op"
+    name="at_06_media_filtration_op"
 )
 
-initiation_op = k8s_job_op.configured(
+at_07_initiation_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-07-initiation:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -79,10 +79,10 @@ initiation_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="initiation_op"
+    name="at_07_initiation_op"
 )
 
-download_check_op = k8s_job_op.configured(
+at_08_download_check_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-08-download-check:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -90,10 +90,10 @@ download_check_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="download_check_op"
+    name="at_08_download_check_op"
 )
 
-transfer_op = k8s_job_op.configured(
+at_09_transfer_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -101,10 +101,10 @@ transfer_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="transfer_op"
+    name="at_09_transfer_op"
 )
 
-cleanup_op = k8s_job_op.configured(
+at_10_cleanup_op = k8s_job_op.configured(
     {
         "image": f"ghcr.io/x81k25/automatic-transmission/at-10-cleanup:{os.getenv('ENVIRONMENT', 'dev')}",
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -112,5 +112,5 @@ cleanup_op = k8s_job_op.configured(
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
     },
-    name="cleanup_op"
+    name="at_10_cleanup_op"
 )
