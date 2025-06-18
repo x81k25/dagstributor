@@ -2,10 +2,10 @@
 
 from dagster import job
 
-# Global job configuration for testing timeouts
+# Global job configuration
 JOB_CONFIG = {
     "tags": {
-        "dagster/max_runtime": "2",  # 2 seconds for testing
+        "dagster/max_runtime": "600",  # 10 minutes global job timeout
     }
 }
 
