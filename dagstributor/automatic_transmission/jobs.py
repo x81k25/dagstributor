@@ -2,10 +2,10 @@
 
 from dagster import job
 
-# Global job configuration
+# Global job configuration  
 JOB_CONFIG = {
     "tags": {
-        "dagster/max_runtime": "600",  # 10 minutes global job timeout
+        "dagster/max_runtime": "60",  # 60 seconds - informational only, not enforced
     }
 }
 
@@ -23,7 +23,7 @@ from .ops import (
 )
 
 
-@job(tags={"dagster/max_runtime": "5"})  # 5 seconds for individual job timeout test
+@job(**JOB_CONFIG)
 def at_01_rss_ingest_job():
     """RSS Ingest job - runs at :00 minutes."""
     at_01_rss_ingest_op()

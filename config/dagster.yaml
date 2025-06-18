@@ -11,9 +11,9 @@ run_launcher:
     load_incluster_config: true
     job_image: dagster/dagster-k8s:1.10.20
     job_spec_config:
-      activeDeadlineSeconds: 20  # 20 seconds for testing run launcher timeout
+      activeDeadlineSeconds: 900  # 15 minutes for run launcher jobs
       backoffLimit: 0
-    wait_timeout: 25  # Wait 25 seconds for K8s job completion before timing out
+    wait_timeout: 70  # Wait 70s for K8s job completion (10s buffer over 60s op timeout)
 
 storage:
   postgres:
@@ -32,8 +32,8 @@ compute_logs:
 
 run_monitoring:
   enabled: true
-  poll_interval_seconds: 1
+  poll_interval_seconds: 5
   max_resume_run_attempts: 0
-  start_timeout_seconds: 15
-  max_runtime_seconds: 5  # Global timeout for all runs (5s for testing)
-  cancellation_thread_poll_interval_seconds: 1
+  start_timeout_seconds: 30
+  # max_runtime_seconds: Removed - not implemented in Dagster 1.10.20
+  cancellation_thread_poll_interval_seconds: 5
