@@ -1,0 +1,53 @@
+# Staging environment schedule configuration
+# Inherits from base.yaml and overrides specific settings
+
+schedules:
+  at_01_rss_ingest:
+    enabled: true
+    cron_schedule: "0 * * * *"  # every hour at :00
+    default_status: "RUNNING"
+    
+  at_02_collect:
+    enabled: true
+    cron_schedule: "6 * * * *"  # every hour at :06
+    default_status: "RUNNING"
+    
+  at_03_parse:
+    enabled: true
+    cron_schedule: "12 * * * *"  # every hour at :12
+    default_status: "RUNNING"
+    
+  at_04_file_filtration:
+    enabled: true
+    cron_schedule: "18 * * * *"  # every hour at :18
+    default_status: "RUNNING"
+    
+  at_05_metadata_collection:
+    enabled: true
+    cron_schedule: "24 * * * *"  # every hour at :24
+    default_status: "RUNNING"
+    
+  at_06_media_filtration:
+    enabled: true
+    cron_schedule: "30 * * * *"  # every hour at :30
+    default_status: "RUNNING"
+    
+  at_07_initiation:
+    enabled: true
+    cron_schedule: "36 * * * *"  # every hour at :36
+    default_status: "RUNNING"
+    
+  at_08_download_check:
+    enabled: true
+    cron_schedule: "42 * * * *"  # every hour at :42
+    default_status: "RUNNING"
+    
+  at_09_transfer:
+    enabled: true
+    cron_schedule: "48 * * * *"  # every hour at :48
+    default_status: "RUNNING"
+    
+  at_10_cleanup:
+    enabled: true
+    cron_schedule: "54 * * * *"  # every hour at :54
+    default_status: "RUNNING"
