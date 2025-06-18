@@ -11,7 +11,7 @@ BASE_K8S_CONFIG = {
     "env_config_maps": ["at-config", "environment"],
     "env_secrets": ["at-sensitive"],
     "job_spec_config": {
-        "activeDeadlineSeconds": 300,  # 5 minutes global K8s operation timeout
+        "activeDeadlineSeconds": 15,  # 15 seconds for timeout testing
         "backoffLimit": 0
     },
 }
