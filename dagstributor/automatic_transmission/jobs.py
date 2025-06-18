@@ -2,6 +2,13 @@
 
 from dagster import job
 
+# Global job configuration  
+JOB_CONFIG = {
+    "tags": {
+        "dagster/max_runtime": "60",  # 60 seconds - informational only, not enforced
+    }
+}
+
 from .ops import (
     at_01_rss_ingest_op,
     at_02_collect_op,
@@ -16,61 +23,61 @@ from .ops import (
 )
 
 
-@job
+@job(**JOB_CONFIG)
 def at_01_rss_ingest_job():
     """RSS Ingest job - runs at :00 minutes."""
     at_01_rss_ingest_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_02_collect_job():
     """Collect job - runs at :06 minutes."""
     at_02_collect_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_03_parse_job():
     """Parse job - runs at :12 minutes."""
     at_03_parse_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_04_file_filtration_job():
     """File Filtration job - runs at :18 minutes."""
     at_04_file_filtration_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_05_metadata_collection_job():
     """Metadata Collection job - runs at :24 minutes."""
     at_05_metadata_collection_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_06_media_filtration_job():
     """Media Filtration job - runs at :30 minutes."""
     at_06_media_filtration_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_07_initiation_job():
     """Initiation job - runs at :36 minutes."""
     at_07_initiation_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_08_download_check_job():
     """Download Check job - runs at :42 minutes."""
     at_08_download_check_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_09_transfer_job():
     """Transfer job - runs at :48 minutes."""
     at_09_transfer_op()
 
 
-@job
+@job(**JOB_CONFIG)
 def at_10_cleanup_job():
     """Cleanup job - runs at :54 minutes."""
     at_10_cleanup_op()
