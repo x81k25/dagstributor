@@ -11,7 +11,7 @@ run_launcher:
     load_incluster_config: true
     job_image: dagster/dagster-k8s:1.5.5
     job_spec_config:
-      activeDeadlineSeconds: 3
+      activeDeadlineSeconds: 2  # Global run timeout for testing (2 seconds)
       backoffLimit: 0
 
 storage:
