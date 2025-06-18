@@ -23,7 +23,7 @@ from .ops import (
 )
 
 
-@job(**JOB_CONFIG)
+@job(tags={"dagster/max_runtime": "5"})  # 5 seconds for individual job timeout test
 def at_01_rss_ingest_job():
     """RSS Ingest job - runs at :00 minutes."""
     at_01_rss_ingest_op()
