@@ -1,0 +1,53 @@
+# Production environment schedule configuration
+# Inherits from base.yaml and overrides specific settings
+
+schedules:
+  at_01_rss_ingest:
+    enabled: true
+    cron_schedule: "*/15 * * * *"  # every 15 minutes
+    default_status: "RUNNING"
+    
+  at_02_collect:
+    enabled: true
+    cron_schedule: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"  # every 5 minutes with 2 minute offset
+    default_status: "RUNNING"
+    
+  at_03_parse:
+    enabled: true
+    cron_schedule: "2,18,32,47 * * * *"  # every 15 minutes with 2 minute offset
+    default_status: "RUNNING"
+    
+  at_04_file_filtration:
+    enabled: true
+    cron_schedule: "4,19,34,49 * * * *"  # every 15 minutes with 4 minute offset
+    default_status: "RUNNING"
+    
+  at_05_metadata_collection:
+    enabled: true
+    cron_schedule: "6,21,36,51 * * * *"  # every 15 minutes with 6 minute offset
+    default_status: "RUNNING"
+    
+  at_06_media_filtration:
+    enabled: true
+    cron_schedule: "8,23,38,53 * * * *"  # every 15 minutes with 8 minute offset
+    default_status: "RUNNING"
+    
+  at_07_initiation:
+    enabled: true
+    cron_schedule: "12,27,42,57 * * * *"  # every 15 minutes with 12 minute offset
+    default_status: "RUNNING"
+    
+  at_08_download_check:
+    enabled: true
+    cron_schedule: "*/5 * * * *"  # every 5 minutes
+    default_status: "RUNNING"
+    
+  at_09_transfer:
+    enabled: true
+    cron_schedule: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"  # every 5 minutes with 2 minute offset
+    default_status: "RUNNING"
+    
+  at_10_cleanup:
+    enabled: true
+    cron_schedule: "6 4 * * *"  # nightly at 04:06
+    default_status: "RUNNING"
