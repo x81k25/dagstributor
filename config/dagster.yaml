@@ -31,7 +31,7 @@ compute_logs:
 
 run_monitoring:
   enabled: true
-  poll_interval_seconds: 5
+  poll_interval_seconds: 1
   max_resume_run_attempts: 0
   start_timeout_seconds: 15
   max_runtime_seconds: 5  # Global timeout for all runs (5s for testing)
