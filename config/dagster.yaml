@@ -10,6 +10,9 @@ run_launcher:
     job_namespace: orchestration
     load_incluster_config: true
     job_image: dagster/dagster-k8s:1.5.5
+    job_spec_config:
+      activeDeadlineSeconds: 10
+      backoffLimit: 0
 
 storage:
   postgres:
@@ -28,4 +31,6 @@ compute_logs:
 
 run_monitoring:
   enabled: true
-  poll_interval_seconds: 30
+  poll_interval_seconds: 5
+  max_resume_run_attempts: 0
+  start_timeout_seconds: 15
