@@ -34,4 +34,4 @@ run_monitoring:
   poll_interval_seconds: 5
   max_resume_run_attempts: 0
   start_timeout_seconds: 15
-  max_runtime_seconds: 10  # Global timeout for all runs (10s for testing)
+  max_runtime_seconds: 5  # Global timeout for all runs (5s for testing)
