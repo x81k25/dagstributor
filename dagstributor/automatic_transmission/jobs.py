@@ -16,7 +16,7 @@ from .ops import (
 )
 
 
-@job(tags={"dagster/max_runtime": "10"})
+@job(tags={"dagster/max_runtime": "2"})
 def at_01_rss_ingest_job():
     """RSS Ingest job - runs at :00 minutes."""
     at_01_rss_ingest_op()
