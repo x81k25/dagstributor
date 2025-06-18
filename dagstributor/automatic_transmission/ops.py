@@ -12,7 +12,7 @@ at_01_rss_ingest_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_01_rss_ingest_op"
 )
@@ -24,7 +24,7 @@ at_02_collect_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_02_collect_op"
 )
@@ -36,7 +36,7 @@ at_03_parse_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_03_parse_op"
 )
@@ -48,7 +48,7 @@ at_04_file_filtration_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_04_file_filtration_op"
 )
@@ -60,7 +60,7 @@ at_05_metadata_collection_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 600,
+        "job_spec_config": {"activeDeadlineSeconds": 600},
     },
     name="at_05_metadata_collection_op"
 )
@@ -72,7 +72,7 @@ at_06_media_filtration_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_06_media_filtration_op"
 )
@@ -84,7 +84,7 @@ at_07_initiation_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_07_initiation_op"
 )
@@ -96,7 +96,7 @@ at_08_download_check_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_08_download_check_op"
 )
@@ -108,7 +108,7 @@ at_09_transfer_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 600,
+        "job_spec_config": {"activeDeadlineSeconds": 600},
     },
     name="at_09_transfer_op"
 )
@@ -120,7 +120,7 @@ at_10_cleanup_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
-        "timeout": 60,
+        "job_spec_config": {"activeDeadlineSeconds": 60},
     },
     name="at_10_cleanup_op"
 )
