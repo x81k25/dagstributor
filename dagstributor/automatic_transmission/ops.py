@@ -12,6 +12,7 @@ at_01_rss_ingest_op = k8s_job_op.configured(
         "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
         "env_config_maps": ["at-config", "environment"],
         "env_secrets": ["at-sensitive"],
+        "job_spec_config": {"activeDeadlineSeconds": 5},
     },
     name="at_01_rss_ingest_op"
 )
