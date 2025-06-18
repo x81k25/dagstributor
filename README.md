@@ -26,8 +26,8 @@ The system consists of 10 sequential jobs that form a complete data processing p
 ```
 dagstributor/
 ├── config/
-│   ├── dagster.yaml              # Dagster infrastructure configuration
-│   └── schedules/                # Environment-specific schedule configs
+│   ├── dagster.yaml             # Dagster infrastructure configuration
+│   └── schedules/               # Environment-specific schedule configs
 │       ├── base.yaml            # Base schedule configuration
 │       ├── dev.yaml             # Development overrides
 │       ├── stg.yaml             # Staging overrides
