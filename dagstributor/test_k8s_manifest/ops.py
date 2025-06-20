@@ -9,18 +9,20 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 # Method 1: Simple inline manifest using k8s_job_op
-test_manifest_method1 = k8s_job_op.configured({
-    "name": "test-manifest-method1",
-    "image": "busybox:latest",
-    "command": ["echo", "Method 1: Testing manifest application"],
-    "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
-    "load_incluster_config": True,
-    "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
-    "job_spec_config": {
-        "ttl_seconds_after_finished": 60,
-        "backoff_limit": 0
-    }
-})
+test_manifest_method1 = k8s_job_op.configured(
+    config={
+        "image": "busybox:latest",
+        "command": ["echo", "Method 1: Testing manifest application"],
+        "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
+        "load_incluster_config": True,
+        "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
+        "job_spec_config": {
+            "ttl_seconds_after_finished": 60,
+            "backoff_limit": 0
+        }
+    },
+    name="test_manifest_method1"
+)
 
 # Method 2: Using raw manifest with k8s Python client
 @op(
@@ -61,26 +63,28 @@ def test_manifest_method2(context):
             raise
 
 # Method 3: Using k8s_job_op with container_config
-test_manifest_method3 = k8s_job_op.configured({
-    "name": "test-manifest-method3",
-    "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
-    "load_incluster_config": True,
-    "container_config": {
-        "image": "busybox:latest",
-        "command": ["sh", "-c"],
-        "args": ["echo 'Method 3: Testing with container_config' && sleep 10"],
-        "env": [
-            {"name": "TEST_ENV", "value": "method3"}
-        ]
+test_manifest_method3 = k8s_job_op.configured(
+    config={
+        "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
+        "load_incluster_config": True,
+        "container_config": {
+            "image": "busybox:latest",
+            "command": ["sh", "-c"],
+            "args": ["echo 'Method 3: Testing with container_config' && sleep 10"],
+            "env": [
+                {"name": "TEST_ENV", "value": "method3"}
+            ]
+        },
+        "pod_spec_config": {
+            "image_pull_secrets": [{"name": "ghcr-pull-image-token"}]
+        },
+        "job_spec_config": {
+            "ttl_seconds_after_finished": 60,
+            "backoff_limit": 0
+        }
     },
-    "pod_spec_config": {
-        "image_pull_secrets": [{"name": "ghcr-pull-image-token"}]
-    },
-    "job_spec_config": {
-        "ttl_seconds_after_finished": 60,
-        "backoff_limit": 0
-    }
-})
+    name="test_manifest_method3"
+)
 
 # Test job combining all methods
 @job
