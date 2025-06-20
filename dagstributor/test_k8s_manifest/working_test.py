@@ -5,10 +5,9 @@ from dagster_k8s import k8s_job_op
 
 # Create a k8s op exactly like the working ones
 test_k8s_working_op = k8s_job_op.configured({
-    "image": "busybox:latest",  # Using busybox instead of custom image
+    "image": "busybox:latest",
     "command": ["/bin/sh", "-c", "echo 'SUCCESS: K8s manifest properly applied!' && date"],
     "namespace": "media-dev",
-    "name": "test-k8s-working",
     "image_pull_policy": "IfNotPresent",
     "env_vars": ["DAGSTER_RUN_JOB_NAME"],
     "container_config": {
