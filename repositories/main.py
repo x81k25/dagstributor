@@ -28,6 +28,8 @@ from dagstributor.automatic_transmission.schedules import (
     at_10_cleanup_schedule,
 )
 from dagstributor.test_k8s_manifest.ops import test_k8s_manifest_job
+from dagstributor.test_k8s_manifest.simple_k8s_test import test_k8s_simple_job
+from dagstributor.test_k8s_manifest.test_with_existing import test_existing_k8s_job
 
 
 @repository
@@ -47,6 +49,8 @@ def dagstributor_repo():
         at_10_cleanup_job,
         # Test k8s manifest job
         test_k8s_manifest_job,
+        test_k8s_simple_job,
+        test_existing_k8s_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,
