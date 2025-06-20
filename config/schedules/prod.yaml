@@ -44,7 +44,7 @@ schedules:
     
   at_09_transfer:
     enabled: true
-    cron_schedule: "0 0 30 2 *" #"2,7,12,17,22,27,32,37,42,47,52,57 * * * *"  # every 5 minutes with 2 minute offset
+    cron_schedule: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"  # every 5 minutes with 2 minute offset
     default_status: "RUNNING"
     
   at_10_cleanup:
