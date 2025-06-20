@@ -86,11 +86,10 @@ at_08_download_check_op = k8s_job_op.configured(
     name="at_08_download_check_op"
 )
 
-# Get environment-specific paths - these will be resolved from the Dagster pod's environment
-# which gets values from the same ConfigMaps
-DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR', '/d/media-cache/dev/complete/')
-MOVIE_DIR = os.getenv('MOVIE_DIR', '/d/media-cache/dev/transfer/movies/')
-TV_SHOW_DIR = os.getenv('TV_SHOW_DIR', '/d/media-cache/dev/transfer/tv/')
+# Get environment-specific paths from ConfigMap environment variables
+DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR')
+MOVIE_DIR = os.getenv('MOVIE_DIR')
+TV_SHOW_DIR = os.getenv('TV_SHOW_DIR')
 
 at_09_transfer_op = k8s_job_op.configured(
     {
