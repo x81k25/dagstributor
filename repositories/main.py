@@ -27,6 +27,7 @@ from dagstributor.automatic_transmission.schedules import (
     at_09_transfer_schedule,
     at_10_cleanup_schedule,
 )
+from dagstributor.test_k8s_manifest.ops import test_k8s_manifest_job
 
 
 @repository
@@ -44,6 +45,8 @@ def dagstributor_repo():
         at_08_download_check_job,
         at_09_transfer_job,
         at_10_cleanup_job,
+        # Test k8s manifest job
+        test_k8s_manifest_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,
