@@ -10,7 +10,7 @@ from kubernetes.client.rest import ApiException
 
 # Method 1: Simple inline manifest using k8s_job_op
 test_manifest_method1 = k8s_job_op.configured(
-    config={
+    {
         "image": "busybox:latest",
         "command": ["echo", "Method 1: Testing manifest application"],
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
@@ -64,7 +64,7 @@ def test_manifest_method2(context):
 
 # Method 3: Using k8s_job_op with container_config
 test_manifest_method3 = k8s_job_op.configured(
-    config={
+    {
         "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
         "load_incluster_config": True,
         "container_config": {
