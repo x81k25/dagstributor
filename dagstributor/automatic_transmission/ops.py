@@ -86,25 +86,32 @@ at_08_download_check_op = k8s_job_op.configured(
     name="at_08_download_check_op"
 )
 
+# Get environment-specific paths - these will be resolved from the Dagster pod's environment
+# which gets values from the same ConfigMaps
+DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR', '/d/media-cache/dev/complete/')
+MOVIE_DIR = os.getenv('MOVIE_DIR', '/d/media-cache/dev/transfer/movies/')
+TV_SHOW_DIR = os.getenv('TV_SHOW_DIR', '/d/media-cache/dev/transfer/tv/')
+
 at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        "env_vars": ["DOWNLOAD_DIR", "MOVIE_DIR", "TV_SHOW_DIR"],
         "container_config": {
             "volume_mounts": [
                 {
                     "name": "download-volume",
-                    "mount_path": "/d/media-cache/dev/complete/",
+                    "mount_path": DOWNLOAD_DIR,
                     "read_only": False
                 },
                 {
                     "name": "movie-volume", 
-                    "mount_path": "/d/media-cache/dev/transfer/movies/",
+                    "mount_path": MOVIE_DIR,
                     "read_only": False
                 },
                 {
                     "name": "tv-volume",
-                    "mount_path": "/d/media-cache/dev/transfer/tv/",
+                    "mount_path": TV_SHOW_DIR,
                     "read_only": False
                 }
             ]
@@ -114,21 +121,21 @@ at_09_transfer_op = k8s_job_op.configured(
                 {
                     "name": "download-volume",
                     "host_path": {
-                        "path": "/d/media-cache/dev/complete/",
+                        "path": DOWNLOAD_DIR,
                         "type": "DirectoryOrCreate"
                     }
                 },
                 {
                     "name": "movie-volume",
                     "host_path": {
-                        "path": "/d/media-cache/dev/transfer/movies/",
+                        "path": MOVIE_DIR,
                         "type": "DirectoryOrCreate"
                     }
                 },
                 {
                     "name": "tv-volume",
                     "host_path": {
-                        "path": "/d/media-cache/dev/transfer/tv/",
+                        "path": TV_SHOW_DIR,
                         "type": "DirectoryOrCreate"
                     }
                 }
