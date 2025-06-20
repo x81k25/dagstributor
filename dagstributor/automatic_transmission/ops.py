@@ -90,6 +90,50 @@ at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        "container_config": {
+            "volume_mounts": [
+                {
+                    "name": "download-volume",
+                    "mount_path": "/d/media-cache/dev/complete/",
+                    "read_only": False
+                },
+                {
+                    "name": "movie-volume", 
+                    "mount_path": "/d/media-cache/dev/transfer/movies/",
+                    "read_only": False
+                },
+                {
+                    "name": "tv-volume",
+                    "mount_path": "/d/media-cache/dev/transfer/tv/",
+                    "read_only": False
+                }
+            ]
+        },
+        "pod_spec_config": {
+            "volumes": [
+                {
+                    "name": "download-volume",
+                    "host_path": {
+                        "path": "/d/media-cache/dev/complete/",
+                        "type": "DirectoryOrCreate"
+                    }
+                },
+                {
+                    "name": "movie-volume",
+                    "host_path": {
+                        "path": "/d/media-cache/dev/transfer/movies/",
+                        "type": "DirectoryOrCreate"
+                    }
+                },
+                {
+                    "name": "tv-volume",
+                    "host_path": {
+                        "path": "/d/media-cache/dev/transfer/tv/",
+                        "type": "DirectoryOrCreate"
+                    }
+                }
+            ]
+        }
     },
     name="at_09_transfer_op"
 )
