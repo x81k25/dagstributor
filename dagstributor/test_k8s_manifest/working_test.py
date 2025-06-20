@@ -9,7 +9,6 @@ test_k8s_working_op = k8s_job_op.configured({
     "command": ["/bin/sh", "-c", "echo 'SUCCESS: K8s manifest properly applied!' && date"],
     "namespace": "media-dev",
     "image_pull_policy": "IfNotPresent",
-    "env_vars": ["DAGSTER_RUN_JOB_NAME"],
     "container_config": {
         "resources": {
             "requests": {"cpu": "100m", "memory": "128Mi"},
