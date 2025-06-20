@@ -96,7 +96,7 @@ at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
-        "env_vars": ["DOWNLOAD_DIR", "MOVIE_DIR", "TV_SHOW_DIR"],
+        # Environment variables now available via at-config ConfigMap injection
         "container_config": {
             "volume_mounts": [
                 {
