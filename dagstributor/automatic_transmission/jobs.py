@@ -109,13 +109,14 @@ def at_full_pipeline_job():
     
     Note: This job is designed for manual/on-demand execution only.
     """
-    at_01_rss_ingest_op()
-    at_02_collect_op()
-    at_03_parse_op()
-    at_04_file_filtration_op()
-    at_05_metadata_collection_op()
-    at_06_media_filtration_op()
-    at_07_initiation_op()
-    at_08_download_check_op()
-    at_09_transfer_op()
-    at_10_cleanup_op()
+    # Chain ops sequentially - each op waits for the previous one to complete
+    op1 = at_01_rss_ingest_op()
+    op2 = at_02_collect_op(op1)
+    op3 = at_03_parse_op(op2)
+    op4 = at_04_file_filtration_op(op3)
+    op5 = at_05_metadata_collection_op(op4)
+    op6 = at_06_media_filtration_op(op5)
+    op7 = at_07_initiation_op(op6)
+    op8 = at_08_download_check_op(op7)
+    op9 = at_09_transfer_op(op8)
+    at_10_cleanup_op(op9)
