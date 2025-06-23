@@ -81,3 +81,42 @@ def at_09_transfer_job():
 def at_10_cleanup_job():
     """Cleanup job - runs at :54 minutes."""
     at_10_cleanup_op()
+
+
+# Full pipeline job configuration with extended timeout
+FULL_PIPELINE_JOB_CONFIG = {
+    "tags": {
+        "dagster/max_runtime": "600",  # 10 minutes for all ops
+    }
+}
+
+
+@job(**FULL_PIPELINE_JOB_CONFIG)
+def at_full_pipeline_job():
+    """Complete Automatic Transmission pipeline - runs all 10 ops sequentially.
+    
+    This job runs the entire AT pipeline from start to finish:
+    1. RSS Ingest
+    2. Collect
+    3. Parse
+    4. File Filtration
+    5. Metadata Collection
+    6. Media Filtration
+    7. Initiation
+    8. Download Check
+    9. Transfer
+    10. Cleanup
+    
+    Note: This job is designed for manual/on-demand execution only.
+    """
+    # Chain ops sequentially - each op waits for the previous one to complete
+    op1 = at_01_rss_ingest_op()
+    op2 = at_02_collect_op(op1)
+    op3 = at_03_parse_op(op2)
+    op4 = at_04_file_filtration_op(op3)
+    op5 = at_05_metadata_collection_op(op4)
+    op6 = at_06_media_filtration_op(op5)
+    op7 = at_07_initiation_op(op6)
+    op8 = at_08_download_check_op(op7)
+    op9 = at_09_transfer_op(op8)
+    at_10_cleanup_op(op9)
