@@ -14,6 +14,7 @@ from .automatic_transmission.jobs import (
     at_08_download_check_job,
     at_09_transfer_job,
     at_10_cleanup_job,
+    at_full_pipeline_job,
 )
 from .automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -43,6 +44,7 @@ at_jobs = [
     at_08_download_check_job,
     at_09_transfer_job,
     at_10_cleanup_job,
+    at_full_pipeline_job,
 ]
 
 # Define all automatic transmission schedules

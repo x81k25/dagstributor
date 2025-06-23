@@ -86,10 +86,60 @@ at_08_download_check_op = k8s_job_op.configured(
     name="at_08_download_check_op"
 )
 
+# Get environment-specific paths from ConfigMap environment variables
+DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR')
+MOVIE_DIR = os.getenv('MOVIE_DIR')
+TV_SHOW_DIR = os.getenv('TV_SHOW_DIR')
+
 at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        # Environment variables now available via at-config ConfigMap injection
+        "container_config": {
+            "volume_mounts": [
+                {
+                    "name": "download-volume",
+                    "mount_path": DOWNLOAD_DIR,
+                    "read_only": False
+                },
+                {
+                    "name": "movie-volume", 
+                    "mount_path": MOVIE_DIR,
+                    "read_only": False
+                },
+                {
+                    "name": "tv-volume",
+                    "mount_path": TV_SHOW_DIR,
+                    "read_only": False
+                }
+            ]
+        },
+        "pod_spec_config": {
+            "volumes": [
+                {
+                    "name": "download-volume",
+                    "host_path": {
+                        "path": DOWNLOAD_DIR,
+                        "type": "DirectoryOrCreate"
+                    }
+                },
+                {
+                    "name": "movie-volume",
+                    "host_path": {
+                        "path": MOVIE_DIR,
+                        "type": "DirectoryOrCreate"
+                    }
+                },
+                {
+                    "name": "tv-volume",
+                    "host_path": {
+                        "path": TV_SHOW_DIR,
+                        "type": "DirectoryOrCreate"
+                    }
+                }
+            ]
+        }
     },
     name="at_09_transfer_op"
 )

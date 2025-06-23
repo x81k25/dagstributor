@@ -2,7 +2,6 @@
 
 from dagster import repository
 
-from dagstributor.definitions import defs
 from dagstributor.automatic_transmission.jobs import (
     at_01_rss_ingest_job,
     at_02_collect_job,
