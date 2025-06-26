@@ -276,6 +276,83 @@ def wst_atp_instantiate_op(context):
 
 
 @op(out=Out(dict))
+def wst_atp_reload_op(context):
+    """Execute reload scripts to restore data from backup."""
+    reload_scripts = [
+        "bak/reload_media.sql",
+        "bak/reload_training.sql",
+        "bak/reload_prediction.sql"
+    ]
+    
+    results = []
+    total_statements = 0
+    total_rows = 0
+    
+    context.log.info("Starting data reload with scripts: " + ", ".join(reload_scripts))
+    
+    for script in reload_scripts:
+        try:
+            context.log.info(f"Executing reload script: {script}")
+            result = execute_sql_file(context, script)
+            
+            results.append({
+                "script": script,
+                "status": "success",
+                "statements_executed": result['statements_executed'],
+                "total_rows": result['total_rows']
+            })
+            
+            total_statements += result['statements_executed']
+            total_rows += result['total_rows']
+            
+            context.log.info(f"Successfully executed {script}")
+            
+        except Exception as e:
+            context.log.error(f"Failed to execute {script}: {str(e)}")
+            results.append({
+                "script": script,
+                "status": "failed",
+                "error": str(e)
+            })
+            
+            # Stop execution on failure
+            context.log.error("Stopping data reload due to script failure")
+            return Output(
+                value={
+                    "status": "failed",
+                    "failed_script": script,
+                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
+                    "total_scripts": len(reload_scripts),
+                    "error": str(e),
+                    "results": results
+                },
+                metadata={
+                    "failed_script": script,
+                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
+                    "total_scripts": len(reload_scripts)
+                }
+            )
+    
+    context.log.info(f"Data reload completed successfully. Total: {total_statements} statements, {total_rows} rows")
+    
+    return Output(
+        value={
+            "status": "success",
+            "scripts_executed": len(results),
+            "total_scripts": len(reload_scripts),
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "results": results
+        },
+        metadata={
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "scripts_executed": len(results)
+        }
+    )
+
+
+@op(out=Out(dict))
 def wst_atp_bak_op(context):
     """Execute all backup ATP scripts from sql/bak directory."""
     bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
