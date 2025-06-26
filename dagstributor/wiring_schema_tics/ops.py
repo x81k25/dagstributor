@@ -354,102 +354,162 @@ def wst_atp_reload_op(context):
 
 @op(out=Out(dict))
 def wst_atp_bak_drop_reload_op(context):
-    """Execute complete backup, drop, instantiate, and reload sequence by calling subordinate ops."""
-    context.log.info("Starting complete backup, drop, instantiate, and reload sequence")
+    """Execute complete backup, drop, instantiate, and reload sequence."""
+    bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
+    ddl_scripts = [
+        "ddl/00_drop_schema.sql",
+        "ddl/01_instantiate_media.sql",
+        "ddl/02_instantiate_training.sql", 
+        "ddl/03_instantiate_prediction.sql",
+        "ddl/10_set_perms.sql"
+    ]
+    reload_scripts = [
+        "bak/reload_media.sql",
+        "bak/reload_training.sql",
+        "bak/reload_prediction.sql"
+    ]
     
-    results = {
-        "backup": None,
-        "drop": None, 
-        "instantiate": None,
-        "reload": None
-    }
+    results = []
+    total_statements = 0
+    total_rows = 0
+    
+    context.log.info("Starting complete backup, drop, instantiate, and reload sequence")
     
     try:
         # Step 1: Backup
-        context.log.info("Step 1/4: Executing backup operation")
-        backup_result = wst_atp_bak_op(context).value
-        if backup_result["status"] not in ["success", "completed"]:
-            raise Exception(f"Backup operation failed: {backup_result.get('error', 'Unknown error')}")
-        results["backup"] = backup_result
+        context.log.info("Step 1/4: Executing backup scripts")
+        for script in bak_scripts:
+            try:
+                context.log.info(f"Executing backup script: {script}")
+                result = execute_sql_file(context, f"bak/{script}")
+                
+                results.append({
+                    "step": "backup",
+                    "script": script,
+                    "status": "success",
+                    "statements_executed": result['statements_executed'],
+                    "total_rows": result['total_rows']
+                })
+                
+                total_statements += result['statements_executed']
+                total_rows += result['total_rows']
+                
+            except Exception as e:
+                context.log.error(f"Failed to execute backup script {script}: {str(e)}")
+                return Output(
+                    value={
+                        "status": "failed",
+                        "failed_step": "backup",
+                        "failed_script": script,
+                        "error": str(e),
+                        "results": results
+                    },
+                    metadata={
+                        "failed_step": "backup",
+                        "failed_script": script
+                    }
+                )
+        
         context.log.info("Step 1/4: Backup completed successfully")
         
-        # Step 2: Drop schema
-        context.log.info("Step 2/4: Executing drop schema operation")
-        drop_result = wst_atp_drop_op(context).value
-        if drop_result["status"] != "success":
-            raise Exception(f"Drop operation failed: {drop_result.get('error', 'Unknown error')}")
-        results["drop"] = drop_result
-        context.log.info("Step 2/4: Drop schema completed successfully")
+        # Step 2-4: Drop, instantiate, and reload (DDL + reload scripts)
+        context.log.info("Step 2/4: Executing drop and instantiate scripts")
+        for script in ddl_scripts:
+            try:
+                context.log.info(f"Executing DDL script: {script}")
+                result = execute_sql_file(context, script)
+                
+                step_name = "drop" if "drop" in script else "instantiate"
+                results.append({
+                    "step": step_name,
+                    "script": script,
+                    "status": "success",
+                    "statements_executed": result['statements_executed'],
+                    "total_rows": result['total_rows']
+                })
+                
+                total_statements += result['statements_executed']
+                total_rows += result['total_rows']
+                
+            except Exception as e:
+                context.log.error(f"Failed to execute DDL script {script}: {str(e)}")
+                return Output(
+                    value={
+                        "status": "failed",
+                        "failed_step": step_name,
+                        "failed_script": script,
+                        "error": str(e),
+                        "results": results
+                    },
+                    metadata={
+                        "failed_step": step_name,
+                        "failed_script": script
+                    }
+                )
         
-        # Step 3: Instantiate schema
-        context.log.info("Step 3/4: Executing schema instantiation")
-        instantiate_result = wst_atp_instantiate_op(context).value
-        if instantiate_result["status"] != "success":
-            raise Exception(f"Instantiation operation failed: {instantiate_result.get('error', 'Unknown error')}")
-        results["instantiate"] = instantiate_result
-        context.log.info("Step 3/4: Schema instantiation completed successfully")
+        context.log.info("Step 2-3/4: Drop and instantiate completed successfully")
         
         # Step 4: Reload data
-        context.log.info("Step 4/4: Executing data reload")
-        reload_result = wst_atp_reload_op(context).value
-        if reload_result["status"] != "success":
-            raise Exception(f"Reload operation failed: {reload_result.get('error', 'Unknown error')}")
-        results["reload"] = reload_result
+        context.log.info("Step 4/4: Executing reload scripts")
+        for script in reload_scripts:
+            try:
+                context.log.info(f"Executing reload script: {script}")
+                result = execute_sql_file(context, script)
+                
+                results.append({
+                    "step": "reload",
+                    "script": script,
+                    "status": "success",
+                    "statements_executed": result['statements_executed'],
+                    "total_rows": result['total_rows']
+                })
+                
+                total_statements += result['statements_executed']
+                total_rows += result['total_rows']
+                
+            except Exception as e:
+                context.log.error(f"Failed to execute reload script {script}: {str(e)}")
+                return Output(
+                    value={
+                        "status": "failed",
+                        "failed_step": "reload",
+                        "failed_script": script,
+                        "error": str(e),
+                        "results": results
+                    },
+                    metadata={
+                        "failed_step": "reload",
+                        "failed_script": script
+                    }
+                )
+        
         context.log.info("Step 4/4: Data reload completed successfully")
-        
         context.log.info("🎉 Complete backup, drop, instantiate, and reload sequence completed successfully!")
-        
-        # Calculate totals from subordinate op results
-        total_statements = (
-            backup_result.get("total_statements", 0) +
-            drop_result.get("statements_executed", 0) +
-            instantiate_result.get("total_statements", 0) +
-            reload_result.get("total_statements", 0)
-        )
-        
-        total_rows = (
-            backup_result.get("total_rows", 0) +
-            drop_result.get("total_rows", 0) +
-            instantiate_result.get("total_rows", 0) +
-            reload_result.get("total_rows", 0)
-        )
         
         return Output(
             value={
                 "status": "success",
                 "message": "Complete backup, drop, instantiate, and reload sequence completed successfully",
-                "steps_completed": 4,
+                "total_statements": total_statements,
+                "total_rows": total_rows,
                 "results": results
             },
             metadata={
-                "steps_completed": 4,
                 "total_statements": total_statements,
-                "total_rows": total_rows
+                "total_rows": total_rows,
+                "scripts_executed": len(results)
             }
         )
         
     except Exception as e:
-        # Determine which step failed
-        failed_step = "unknown"
-        if results["backup"] is None:
-            failed_step = "backup"
-        elif results["drop"] is None:
-            failed_step = "drop"
-        elif results["instantiate"] is None:
-            failed_step = "instantiate" 
-        elif results["reload"] is None:
-            failed_step = "reload"
-        
-        context.log.error(f"Sequence failed at step: {failed_step}")
+        context.log.error(f"Unexpected error in sequence: {str(e)}")
         return Output(
             value={
                 "status": "failed",
-                "failed_step": failed_step,
                 "error": str(e),
                 "results": results
             },
             metadata={
-                "failed_step": failed_step,
                 "sequence_completed": False
             }
         )
