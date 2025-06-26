@@ -368,7 +368,7 @@ def wst_atp_bak_drop_reload_op(context):
         # Step 1: Backup
         context.log.info("Step 1/4: Executing backup operation")
         backup_result = wst_atp_bak_op(context).value
-        if backup_result["status"] != "success":
+        if backup_result["status"] not in ["success", "completed"]:
             raise Exception(f"Backup operation failed: {backup_result.get('error', 'Unknown error')}")
         results["backup"] = backup_result
         context.log.info("Step 1/4: Backup completed successfully")
