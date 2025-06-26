@@ -1,5 +1,5 @@
 from dagster import job
-from .ops import test_db_connection_op, wst_atp_bak_op, wst_atp_drop_op
+from .ops import test_db_connection_op, wst_atp_bak_op, wst_atp_drop_op, wst_atp_instantiate_op
 
 
 @job(description="Test database connection with simple query")
@@ -18,3 +18,9 @@ def wst_atp_bak_job():
 def wst_atp_drop_job():
     """Job to drop the atp schema and all its objects. Use with caution!"""
     wst_atp_drop_op()
+
+
+@job(description="Instantiate the atp schema with all tables and permissions")
+def wst_atp_instantiate_job():
+    """Job to create the atp schema with media, training, prediction tables and set permissions."""
+    wst_atp_instantiate_op()

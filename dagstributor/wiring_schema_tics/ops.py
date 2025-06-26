@@ -198,6 +198,84 @@ def wst_atp_drop_op(context):
 
 
 @op(out=Out(dict))
+def wst_atp_instantiate_op(context):
+    """Execute DDL scripts to instantiate the atp schema in order."""
+    ddl_scripts = [
+        "ddl/01_instantiate_media.sql",
+        "ddl/02_instantiate_training.sql", 
+        "ddl/03_instantiate_prediction.sql",
+        "ddl/10_set_perms.sql"
+    ]
+    
+    results = []
+    total_statements = 0
+    total_rows = 0
+    
+    context.log.info("Starting schema instantiation with scripts: " + ", ".join(ddl_scripts))
+    
+    for script in ddl_scripts:
+        try:
+            context.log.info(f"Executing DDL script: {script}")
+            result = execute_sql_file(context, script)
+            
+            results.append({
+                "script": script,
+                "status": "success",
+                "statements_executed": result['statements_executed'],
+                "total_rows": result['total_rows']
+            })
+            
+            total_statements += result['statements_executed']
+            total_rows += result['total_rows']
+            
+            context.log.info(f"Successfully executed {script}")
+            
+        except Exception as e:
+            context.log.error(f"Failed to execute {script}: {str(e)}")
+            results.append({
+                "script": script,
+                "status": "failed",
+                "error": str(e)
+            })
+            
+            # Stop execution on failure
+            context.log.error("Stopping schema instantiation due to script failure")
+            return Output(
+                value={
+                    "status": "failed",
+                    "failed_script": script,
+                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
+                    "total_scripts": len(ddl_scripts),
+                    "error": str(e),
+                    "results": results
+                },
+                metadata={
+                    "failed_script": script,
+                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
+                    "total_scripts": len(ddl_scripts)
+                }
+            )
+    
+    context.log.info(f"Schema instantiation completed successfully. Total: {total_statements} statements")
+    
+    return Output(
+        value={
+            "status": "success",
+            "scripts_executed": len(results),
+            "total_scripts": len(ddl_scripts),
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "results": results
+        },
+        metadata={
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "scripts_executed": len(results)
+        }
+    )
+
+
+@op(out=Out(dict))
 def wst_atp_bak_op(context):
     """Execute all backup ATP scripts from sql/bak directory."""
     bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
