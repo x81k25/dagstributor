@@ -57,6 +57,27 @@ def execute_sql_file(context, sql_filename):
             # This regex splits on semicolons not inside quotes
             statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', sql_content)
             statements = [stmt.strip() for stmt in statements if stmt.strip()]
+            
+            # Filter out comment-only statements
+            filtered_statements = []
+            for stmt in statements:
+                # Remove single-line comments
+                lines = stmt.split('\n')
+                non_comment_lines = []
+                for line in lines:
+                    # Strip whitespace and check if line is not just a comment
+                    stripped_line = line.strip()
+                    if stripped_line and not stripped_line.startswith('--'):
+                        non_comment_lines.append(line)
+                
+                # Reconstruct statement without comment-only lines
+                cleaned_stmt = '\n'.join(non_comment_lines).strip()
+                
+                # Only include if there's actual SQL content
+                if cleaned_stmt:
+                    filtered_statements.append(cleaned_stmt)
+            
+            statements = filtered_statements
         
         context.log.info(f"Found {len(statements)} SQL statements to execute")
         
