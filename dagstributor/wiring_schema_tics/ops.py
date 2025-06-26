@@ -53,31 +53,33 @@ def execute_sql_file(context, sql_filename):
             context.log.info("Detected dollar-quoted strings, executing as single block")
             statements = [sql_content.strip()]
         else:
-            # Split SQL into individual statements (handle semicolons properly)
-            # This regex splits on semicolons not inside quotes
-            statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', sql_content)
+            # Remove multi-line comment blocks (lines of dashes)
+            # First, remove blocks that are just dashes and comments
+            lines = sql_content.split('\n')
+            cleaned_lines = []
+            in_comment_block = False
+            
+            for line in lines:
+                stripped = line.strip()
+                # Check if this is a comment delimiter line (just dashes)
+                if stripped and all(c == '-' for c in stripped):
+                    in_comment_block = True
+                    continue
+                # If we're in a comment block and hit an empty line after comments, end the block
+                elif in_comment_block and not stripped:
+                    in_comment_block = False
+                    continue
+                # Skip comment lines when in a comment block
+                elif in_comment_block and stripped.startswith('--'):
+                    continue
+                else:
+                    in_comment_block = False
+                    cleaned_lines.append(line)
+            
+            # Rejoin and split on semicolons
+            cleaned_content = '\n'.join(cleaned_lines)
+            statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', cleaned_content)
             statements = [stmt.strip() for stmt in statements if stmt.strip()]
-            
-            # Filter out comment-only statements
-            filtered_statements = []
-            for stmt in statements:
-                # Remove single-line comments
-                lines = stmt.split('\n')
-                non_comment_lines = []
-                for line in lines:
-                    # Strip whitespace and check if line is not just a comment
-                    stripped_line = line.strip()
-                    if stripped_line and not stripped_line.startswith('--'):
-                        non_comment_lines.append(line)
-                
-                # Reconstruct statement without comment-only lines
-                cleaned_stmt = '\n'.join(non_comment_lines).strip()
-                
-                # Only include if there's actual SQL content
-                if cleaned_stmt:
-                    filtered_statements.append(cleaned_stmt)
-            
-            statements = filtered_statements
         
         context.log.info(f"Found {len(statements)} SQL statements to execute")
         
