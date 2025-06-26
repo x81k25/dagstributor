@@ -137,7 +137,7 @@ def test_db_connection_op(context):
 @op(out=Out(dict))
 def wst_bak_atp_op(context):
     """Execute all backup ATP scripts from sql/bak directory."""
-    bak_scripts = ["script1.sql", "script2.sql", "script3.sql"]
+    bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
     results = []
     total_statements = 0
     total_rows = 0
