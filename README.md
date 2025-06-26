@@ -21,6 +21,60 @@ The system consists of 10 sequential jobs that form a complete data processing p
 9. **Transfer** - Transfers completed downloads
 10. **Cleanup** - Removes temporary files and data
 
+### Wiring Schema Tics Module
+
+The `wiring_schema_tics` module provides database schema management capabilities for the system:
+
+#### Available Jobs
+
+1. **test_db_connection_job** - Tests database connectivity with a simple query
+2. **wst_bak_atp_job** - Executes all backup ATP scripts for schema backup and restoration
+
+#### SQL Scripts Organization
+
+- **ddl/** - Data Definition Language scripts for schema creation
+  - `00_drop_schema.sql` - Drops existing schemas
+  - `01_instantiate_media.sql` - Creates media schema and tables
+  - `02_instantiate_training.sql` - Creates training schema and tables
+  - `03_instantiate_prediction.sql` - Creates prediction schema and tables
+
+- **bak/** - Backup and restore scripts
+  - `bak_media.sql` - Backs up media schema
+  - `bak_training.sql` - Backs up training schema
+  - `bak_prediction.sql` - Backs up prediction schema
+  - `reload_media.sql` - Restores media schema from backup
+  - `reload_training.sql` - Restores training schema from backup
+  - `reload_prediction.sql` - Restores prediction schema from backup
+
+- **test.sql** - Simple database connection test script
+
+#### SQL Execution Pattern
+
+All ops in the wiring_schema_tics module follow a consistent pattern for executing SQL scripts:
+
+1. **Script Loading**: SQL files are loaded from the `sql/` directory relative to the ops module
+2. **Database Connection**: Uses psycopg2 with environment variables (WST_PGSQL_*)
+3. **Execution Strategy**:
+   - Scripts with dollar-quoted strings (`$$`) are executed as a single block
+   - Other scripts are split on semicolons and executed statement by statement
+   - Autocommit is enabled for DDL operations
+4. **Error Handling**: Detailed logging of each statement execution with proper error reporting
+5. **Result Collection**: 
+   - SELECT statements return rows as RealDictCursor results
+   - Non-SELECT statements report affected row counts
+   - All ops return structured output with execution metadata
+
+Example pattern used by all ops:
+```python
+def execute_sql_file(context, sql_filename):
+    # 1. Load SQL file from sql/ directory
+    # 2. Connect to database using environment variables
+    # 3. Execute statements (single block for $$ or split on ;)
+    # 4. Return results with metadata
+```
+
+This standardized approach ensures consistent behavior across all database operations.
+
 ## Project Structure
 
 ```
@@ -33,13 +87,21 @@ dagstributor/
 │       ├── stg.yaml             # Staging overrides
 │       └── prod.yaml            # Production overrides
 ├── dagstributor/
-│   └── automatic_transmission/
+│   ├── automatic_transmission/
+│   │   ├── __init__.py
+│   │   ├── assets.py            # Asset definitions
+│   │   ├── ops.py               # Operation implementations
+│   │   ├── jobs.py              # Job definitions
+│   │   ├── schedules.py         # Schedule configurations
+│   │   └── config_loader.py     # YAML config loader
+│   └── wiring_schema_tics/
 │       ├── __init__.py
-│       ├── assets.py            # Asset definitions
-│       ├── ops.py               # Operation implementations
-│       ├── jobs.py              # Job definitions
-│       ├── schedules.py         # Schedule configurations
-│       └── config_loader.py     # YAML config loader
+│       ├── ops.py               # Database operation implementations
+│       ├── jobs.py              # Database management jobs
+│       └── sql/                 # SQL scripts
+│           ├── bak/             # Backup and restore scripts
+│           ├── ddl/             # Schema definition scripts
+│           └── test.sql         # Database connection test
 ├── repositories/
 │   └── main.py                  # Main Dagster repository
 ├── tests/                       # Unit and integration tests
@@ -55,6 +117,15 @@ The system supports three environments with GitOps-based configuration:
 - **prod** - Production environment
 
 Schedule configurations are loaded based on the `ENVIRONMENT` variable and can be customized per environment through YAML files.
+
+### Database Configuration
+
+The wiring_schema_tics module requires the following PostgreSQL environment variables:
+- `WST_PGSQL_HOST` - Database host
+- `WST_PGSQL_PORT` - Database port (default: 5432)
+- `WST_PGSQL_DATABASE` - Database name
+- `WST_PGSQL_USERNAME` - Database username
+- `WST_PGSQL_PASSWORD` - Database password
 
 ## Local Development
 
@@ -99,6 +170,10 @@ dagster job list -f repositories/main.py
 
 # Execute a specific job
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job
+
+# Execute database management jobs
+dagster job execute -f repositories/main.py -j test_db_connection_job
+dagster job execute -f repositories/main.py -j wst_bak_atp_job
 
 # Run with custom config
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job -c config.yaml

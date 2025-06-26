@@ -141,6 +141,40 @@ def test_db_connection_op(context):
 
 
 @op(out=Out(dict))
+def wst_atp_drop_op(context):
+    """Drop the atp schema and all its objects. WARNING: This will delete all data!"""
+    sql_filename = "ddl/00_drop_schema.sql"
+    
+    context.log.warning("⚠️  WARNING: This operation will DROP the atp schema and DELETE all data!")
+    
+    try:
+        result = execute_sql_file(context, sql_filename)
+        
+        context.log.info(f"Successfully dropped schema. Executed {result['statements_executed']} statements")
+        
+        return Output(
+            value={
+                "status": "success",
+                "statements_executed": result['statements_executed'],
+                "sql_file": sql_filename,
+                "message": "Schema 'atp' dropped successfully (if it existed)"
+            },
+            metadata={
+                "statements_executed": result['statements_executed'],
+                "sql_file": sql_filename,
+                "execution_method": "enhanced_psycopg2"
+            }
+        )
+        
+    except Exception as e:
+        context.log.error(f"Failed to execute {sql_filename}: {str(e)}")
+        return Output(
+            value={"status": "failed", "error": str(e), "sql_file": sql_filename},
+            metadata={"sql_file": sql_filename, "execution_method": "enhanced_psycopg2"}
+        )
+
+
+@op(out=Out(dict))
 def wst_bak_atp_op(context):
     """Execute all backup ATP scripts from sql/bak directory."""
     bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
