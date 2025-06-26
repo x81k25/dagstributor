@@ -17,7 +17,7 @@ from .automatic_transmission.jobs import (
     at_10_cleanup_job,
     at_full_pipeline_job,
 )
-from .wiring_schema_tics.jobs import test_db_connection_job, wst_bak_atp_job
+from .wiring_schema_tics.jobs import test_db_connection_job, wst_atp_bak_job, wst_atp_drop_job
 from .automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
     at_02_collect_schedule,
@@ -52,7 +52,8 @@ at_jobs = [
 # Define wiring schema-tics jobs
 ws_jobs = [
     test_db_connection_job,
-    wst_bak_atp_job,
+    wst_atp_bak_job,
+    wst_atp_drop_job,
 ]
 
 # Define all automatic transmission schedules
