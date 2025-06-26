@@ -47,10 +47,16 @@ def execute_sql_file(context, sql_filename):
     executed_statements = 0
     
     try:
-        # Split SQL into individual statements (handle semicolons properly)
-        # This regex splits on semicolons not inside quotes
-        statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', sql_content)
-        statements = [stmt.strip() for stmt in statements if stmt.strip()]
+        # For complex SQL with dollar-quoted strings, execute as single block
+        # Check if content has dollar-quoted strings
+        if '$$' in sql_content:
+            context.log.info("Detected dollar-quoted strings, executing as single block")
+            statements = [sql_content.strip()]
+        else:
+            # Split SQL into individual statements (handle semicolons properly)
+            # This regex splits on semicolons not inside quotes
+            statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', sql_content)
+            statements = [stmt.strip() for stmt in statements if stmt.strip()]
         
         context.log.info(f"Found {len(statements)} SQL statements to execute")
         
