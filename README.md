@@ -112,8 +112,7 @@ dagstributor/
 │   │   ├── schedules.py         # WST schedule configurations
 │   │   └── sql/                 # SQL scripts directory
 │   │       ├── bak/             # Backup and restore scripts
-│   │       ├── ddl/             # Schema definition scripts
-│   │       └── test.sql         # Database connection test
+│   │       └── ddl/             # Schema definition scripts
 │   ├── definitions.py           # Main Dagster definitions
 │   └── resources/               # Resource configurations
 ├── repositories/
