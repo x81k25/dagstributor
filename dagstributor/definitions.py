@@ -1,7 +1,7 @@
 """Central Dagster definitions for the dagstributor project."""
 
 from dagster import Definitions
-from ..resources import postgres_resource
+from .resources import postgres_resource
 
 # All assets have been removed
 from .automatic_transmission.jobs import (
