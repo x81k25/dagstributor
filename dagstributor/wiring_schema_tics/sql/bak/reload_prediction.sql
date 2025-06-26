@@ -28,16 +28,15 @@ DECLARE
     
     -- SQL construction
     select_columns TEXT;
+    insert_columns TEXT;
     insert_sql TEXT;
     mapping_query TEXT;
     date_query TEXT;
-    
-    -- Column mapping storage
-    column_mappings RECORD;
 BEGIN
     -- Initialize variables
     column_count := 0;
     select_columns := '';
+    insert_columns := '';
     
     -- Set target schema/table defaults
     target_schema_final := COALESCE(target_schema, source_schema);
@@ -99,30 +98,44 @@ BEGIN
         RAISE EXCEPTION 'Target table %.% does not exist', target_schema_final, target_table_final;
     END IF;
     
-    -- Build column mapping in TARGET TABLE ORDER
-    FOR target_column_record IN
-        SELECT column_name, ordinal_position
-        FROM information_schema.columns
-        WHERE table_schema = target_schema_final
-        AND table_name = target_table_final
-        ORDER BY ordinal_position
+    -- Build column mapping for ONLY columns that exist in both backup and target
+    FOR mapping_record IN
+        EXECUTE 'SELECT source_column_name, bak_column_name, source_pgsql_data_type, bak_pgsql_data_type, enum_name 
+                 FROM ' || backup_schema || '.' || column_mapping_table_name || ' 
+                 WHERE source_column_name IS NOT NULL 
+                 ORDER BY source_column_name'
     LOOP
-        -- Look up this column in our mapping table
-        mapping_query := 'SELECT source_column_name, bak_column_name, source_pgsql_data_type, bak_pgsql_data_type, enum_name 
-                          FROM ' || backup_schema || '.' || column_mapping_table_name || ' 
-                          WHERE source_column_name = ''' || target_column_record.column_name || '''';
-        
-        EXECUTE mapping_query INTO mapping_record;
-        
-        -- Skip if this column is not in the mapping (source_column_name is NULL)
-        IF mapping_record.source_column_name IS NULL THEN
+        -- Verify this column exists in the target table
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = target_schema_final
+            AND table_name = target_table_final
+            AND column_name = mapping_record.source_column_name
+        ) THEN
+            RAISE NOTICE 'Skipping column % - not found in target table', mapping_record.source_column_name;
             CONTINUE;
         END IF;
         
-        -- Build SELECT clause
+        -- Verify this column exists in the backup table
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = backup_schema
+            AND table_name = backup_table_name
+            AND column_name = mapping_record.bak_column_name
+        ) THEN
+            RAISE NOTICE 'Skipping column % - backup column % not found in backup table', 
+                mapping_record.source_column_name, mapping_record.bak_column_name;
+            CONTINUE;
+        END IF;
+        
+        -- Build INSERT column list and SELECT clause
         IF column_count > 0 THEN
             select_columns := select_columns || ', ';
+            insert_columns := insert_columns || ', ';
         END IF;
+        
+        -- Add target column name to INSERT list
+        insert_columns := insert_columns || mapping_record.source_column_name;
         
         -- Handle enum conversion based on column mapping info
         IF mapping_record.enum_name IS NOT NULL AND mapping_record.bak_pgsql_data_type = 'text' THEN
@@ -139,12 +152,12 @@ BEGIN
     
     -- Verify we have columns to restore
     IF column_count = 0 THEN
-        RAISE EXCEPTION 'No valid columns found in column mapping table for restore';
+        RAISE EXCEPTION 'No valid columns found for restore - no matching columns between backup and target';
     END IF;
     
-    -- Construct and execute INSERT statement
+    -- Construct and execute INSERT statement with explicit column list
     insert_sql := 'INSERT INTO ' || target_schema_final || '.' || target_table_final || 
-                  ' SELECT ' || select_columns || 
+                  ' (' || insert_columns || ') SELECT ' || select_columns || 
                   ' FROM ' || backup_schema || '.' || backup_table_name;
     
     RAISE NOTICE 'Executing restore: %', insert_sql;
