@@ -175,7 +175,7 @@ def wst_atp_drop_op(context):
 
 
 @op(out=Out(dict))
-def wst_bak_atp_op(context):
+def wst_atp_bak_op(context):
     """Execute all backup ATP scripts from sql/bak directory."""
     bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
     results = []

@@ -28,7 +28,8 @@ The `wiring_schema_tics` module provides database schema management capabilities
 #### Available Jobs
 
 1. **test_db_connection_job** - Tests database connectivity with a simple query
-2. **wst_bak_atp_job** - Executes all backup ATP scripts for schema backup and restoration
+2. **wst_atp_bak_job** - Executes all backup ATP scripts for schema backup and restoration
+3. **wst_atp_drop_job** - Drops the atp schema (WARNING: deletes all data!)
 
 #### SQL Scripts Organization
 
@@ -173,7 +174,8 @@ dagster job execute -f repositories/main.py -j at_01_rss_ingest_job
 
 # Execute database management jobs
 dagster job execute -f repositories/main.py -j test_db_connection_job
-dagster job execute -f repositories/main.py -j wst_bak_atp_job
+dagster job execute -f repositories/main.py -j wst_atp_bak_job
+dagster job execute -f repositories/main.py -j wst_atp_drop_job
 
 # Run with custom config
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job -c config.yaml
