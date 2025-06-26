@@ -70,13 +70,7 @@ at_schedules = [
 
 # Configure resources
 resources = {
-    "postgres": postgres_resource.configured({
-        "host": EnvVar("WST_PGSQL_HOST"),
-        "port": EnvVar("WST_PGSQL_PORT"),
-        "database": EnvVar("WST_PGSQL_DATABASE"),
-        "user": EnvVar("WST_PGSQL_USERNAME"),
-        "password": EnvVar("WST_PGSQL_PASSWORD"),
-    })
+    "postgres": postgres_resource
 }
 
 # Create the Definitions object
