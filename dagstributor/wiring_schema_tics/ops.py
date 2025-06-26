@@ -1,11 +1,13 @@
 from dagster import op, Out, Output
 from pathlib import Path
-import subprocess
+import psycopg2
+import psycopg2.extras
 import os
+import re
 
 
 def execute_sql_file(context, sql_filename):
-    """Execute SQL file using psql subprocess for robust handling of complex scripts."""
+    """Execute SQL file using enhanced psycopg2 for robust handling of complex scripts."""
     sql_file = Path(__file__).parent / "sql" / sql_filename
     
     if not sql_file.exists():
@@ -14,60 +16,113 @@ def execute_sql_file(context, sql_filename):
     
     context.log.info(f"Executing SQL file: {sql_filename}")
     
-    # Use psql subprocess for robust SQL execution
-    result = subprocess.run([
-        'psql',
-        '-h', os.getenv('WST_PGSQL_HOST'),
-        '-p', os.getenv('WST_PGSQL_PORT'), 
-        '-U', os.getenv('WST_PGSQL_USERNAME'),
-        '-d', os.getenv('WST_PGSQL_DATABASE'),
-        '-f', str(sql_file),
-        '--quiet',  # reduce noise
-        '--no-align',  # clean output
-        '--tuples-only'  # data only
-    ], 
-    env={
-        **os.environ,
-        'PGPASSWORD': os.getenv('WST_PGSQL_PASSWORD')
-    },
-    capture_output=True, 
-    text=True,
-    timeout=3600  # 1 hour timeout
-    )
+    # Read the entire SQL file
+    try:
+        with open(sql_file, 'r', encoding='utf-8') as f:
+            sql_content = f.read()
+    except Exception as e:
+        context.log.error(f"Failed to read SQL file {sql_filename}: {str(e)}")
+        raise
     
-    if result.returncode != 0:
-        context.log.error(f"SQL execution failed for {sql_filename}: {result.stderr}")
-        raise Exception(f"SQL execution failed for {sql_filename}: {result.stderr}")
+    # Create database connection
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv('WST_PGSQL_HOST'),
+            port=int(os.getenv('WST_PGSQL_PORT')),
+            database=os.getenv('WST_PGSQL_DATABASE'),
+            user=os.getenv('WST_PGSQL_USERNAME'),
+            password=os.getenv('WST_PGSQL_PASSWORD'),
+            cursor_factory=psycopg2.extras.RealDictCursor
+        )
+        
+        # Set autocommit for DDL operations and complex scripts
+        conn.autocommit = True
+        
+    except Exception as e:
+        context.log.error(f"Failed to connect to database: {str(e)}")
+        raise
     
-    context.log.info(f"Successfully executed SQL file: {sql_filename}")
-    return result.stdout
+    cursor = conn.cursor()
+    results = []
+    executed_statements = 0
+    
+    try:
+        # Split SQL into individual statements (handle semicolons properly)
+        # This regex splits on semicolons not inside quotes
+        statements = re.split(r';(?=(?:[^\']*\'[^\']*\')*[^\']*$)', sql_content)
+        statements = [stmt.strip() for stmt in statements if stmt.strip()]
+        
+        context.log.info(f"Found {len(statements)} SQL statements to execute")
+        
+        for i, statement in enumerate(statements, 1):
+            if not statement:
+                continue
+                
+            context.log.debug(f"Executing statement {i}/{len(statements)}")
+            
+            try:
+                cursor.execute(statement)
+                executed_statements += 1
+                
+                # If it's a SELECT statement, fetch results
+                if statement.strip().upper().startswith('SELECT'):
+                    rows = cursor.fetchall()
+                    results.extend(rows)
+                    context.log.debug(f"Statement {i} returned {len(rows)} rows")
+                else:
+                    # For non-SELECT statements, log affected rows if available
+                    if cursor.rowcount >= 0:
+                        context.log.debug(f"Statement {i} affected {cursor.rowcount} rows")
+                        
+            except Exception as e:
+                context.log.error(f"Failed executing statement {i}: {statement[:100]}...")
+                context.log.error(f"Error: {str(e)}")
+                raise Exception(f"SQL execution failed at statement {i}: {str(e)}")
+        
+        context.log.info(f"Successfully executed {executed_statements} statements from {sql_filename}")
+        context.log.info(f"Total result rows: {len(results)}")
+        
+        return {
+            'results': results,
+            'statements_executed': executed_statements,
+            'total_rows': len(results)
+        }
+        
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @op(out=Out(dict))
 def test_db_connection_op(context):
-    """Test database connection by executing SQL from test.sql file using robust psql execution."""
+    """Test database connection by executing SQL from test.sql file using enhanced psycopg2."""
     sql_filename = "test.sql"
     
     try:
-        output = execute_sql_file(context, sql_filename)
+        result = execute_sql_file(context, sql_filename)
         
-        # Count lines in output to estimate record count
-        lines = output.strip().split('\n') if output.strip() else []
-        record_count = len([line for line in lines if line.strip()])
+        context.log.info(f"Executed {result['statements_executed']} statements, {result['total_rows']} total rows")
         
-        context.log.info(f"Found {record_count} records from {sql_filename}")
+        # Create preview of results if any
+        preview = ""
+        if result['results']:
+            preview = str(result['results'][:3])  # First 3 rows
+            if len(result['results']) > 3:
+                preview += f"... and {len(result['results']) - 3} more rows"
         
         return Output(
             value={
                 "status": "success", 
-                "record_count": record_count, 
+                "statements_executed": result['statements_executed'],
+                "total_rows": result['total_rows'],
                 "sql_file": sql_filename,
-                "output_preview": output[:500] if output else "No output"
+                "results_preview": preview
             },
             metadata={
-                "record_count": record_count,
+                "statements_executed": result['statements_executed'],
+                "total_rows": result['total_rows'],
                 "sql_file": sql_filename,
-                "execution_method": "psql_subprocess"
+                "execution_method": "enhanced_psycopg2"
             }
         )
         
@@ -75,5 +130,55 @@ def test_db_connection_op(context):
         context.log.error(f"Failed to execute {sql_filename}: {str(e)}")
         return Output(
             value={"status": "failed", "error": str(e), "sql_file": sql_filename},
-            metadata={"sql_file": sql_filename, "execution_method": "psql_subprocess"}
+            metadata={"sql_file": sql_filename, "execution_method": "enhanced_psycopg2"}
         )
+
+
+@op(out=Out(dict))
+def wst_bak_atp_op(context):
+    """Execute all backup ATP scripts from sql/bak directory."""
+    bak_scripts = ["script1.sql", "script2.sql", "script3.sql"]
+    results = []
+    total_statements = 0
+    total_rows = 0
+    
+    for script in bak_scripts:
+        try:
+            context.log.info(f"Executing backup script: {script}")
+            result = execute_sql_file(context, f"bak/{script}")
+            
+            results.append({
+                "script": script,
+                "status": "success",
+                "statements_executed": result['statements_executed'],
+                "total_rows": result['total_rows']
+            })
+            
+            total_statements += result['statements_executed']
+            total_rows += result['total_rows']
+            
+        except Exception as e:
+            context.log.error(f"Failed to execute {script}: {str(e)}")
+            results.append({
+                "script": script,
+                "status": "failed", 
+                "error": str(e)
+            })
+    
+    context.log.info(f"Completed backup ATP execution. Total: {total_statements} statements, {total_rows} rows")
+    
+    return Output(
+        value={
+            "status": "completed",
+            "scripts_executed": len([r for r in results if r['status'] == 'success']),
+            "total_scripts": len(bak_scripts),
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "results": results
+        },
+        metadata={
+            "total_statements": total_statements,
+            "total_rows": total_rows,
+            "execution_method": "enhanced_psycopg2"
+        }
+    )
