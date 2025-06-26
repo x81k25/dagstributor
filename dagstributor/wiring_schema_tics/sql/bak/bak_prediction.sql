@@ -5,7 +5,7 @@
 CREATE SCHEMA IF NOT EXISTS bak;
 
 --------------------------------------------------------------------------------
--- copy operation config
+-- backup operation with metadata tables
 --------------------------------------------------------------------------------
 
 DO $$
@@ -15,8 +15,10 @@ DECLARE
     current_date_str TEXT;
     source_schema TEXT := 'atp';
     target_schema TEXT := 'bak';
-    table_to_backup TEXT := 'prediction'; -- specify table name here
+    table_to_backup TEXT := 'prediction'; -- Specify the table name here
     new_table_name TEXT;
+    metadata_table_name TEXT;
+    column_mapping_table_name TEXT;
     select_clause TEXT;
     enum_columns TEXT[];
 BEGIN
@@ -36,11 +38,44 @@ BEGIN
         RAISE EXCEPTION 'Table %.% does not exist', source_schema, table_to_backup;
     END IF;
 
+	-- Create table names
+    new_table_name := source_schema || '_' || table_to_backup || '_' || current_date_str;
+    metadata_table_name := source_schema || '_' || table_to_backup || '_' || current_date_str || '_metadata' ;
+    column_mapping_table_name := source_schema || '_' || table_to_backup  || '_' || current_date_str || '_column_mapping';
+
+    -- Drop existing tables if they exist (overwrite same day backups)
+    EXECUTE 'DROP TABLE IF EXISTS ' || target_schema || '.' || new_table_name;
+    EXECUTE 'DROP TABLE IF EXISTS ' || target_schema || '.' || metadata_table_name;
+    EXECUTE 'DROP TABLE IF EXISTS ' || target_schema || '.' || column_mapping_table_name;
+
+    -- Create metadata table
+    EXECUTE 'CREATE TABLE ' || target_schema || '.' || metadata_table_name || ' (
+        backup_date DATE,
+        source_schema TEXT,
+        source_table TEXT,
+        backup_table TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )';
+
+    -- Insert metadata
+    EXECUTE 'INSERT INTO ' || target_schema || '.' || metadata_table_name || 
+            ' (backup_date, source_schema, source_table, backup_table) VALUES (''' ||
+            CURRENT_DATE || ''', ''' || source_schema || ''', ''' || table_to_backup || ''', ''' || new_table_name || ''')';
+
+    -- Create column mapping table
+    EXECUTE 'CREATE TABLE ' || target_schema || '.' || column_mapping_table_name || ' (
+        source_column_name TEXT,
+        bak_column_name TEXT,
+        source_pgsql_data_type TEXT,
+        bak_pgsql_data_type TEXT,
+        enum_name TEXT
+    )';
+
     -- Reset for the table
     select_clause := '';
     enum_columns := ARRAY[]::TEXT[];
 
-    -- Build SELECT clause with enum conversion for the specified table
+    -- Build SELECT clause and populate column mapping
     FOR column_record IN
         SELECT
             c.column_name,
@@ -51,7 +86,6 @@ BEGIN
         AND c.table_name = table_to_backup
         ORDER BY c.ordinal_position
     LOOP
-        -- [Rest of the column processing logic remains the same]
         -- Check if column is an enum type
         IF column_record.data_type = 'USER-DEFINED' AND
            EXISTS (
@@ -67,17 +101,26 @@ BEGIN
             END IF;
             select_clause := select_clause || column_record.column_name || '::text AS ' || column_record.column_name;
             enum_columns := array_append(enum_columns, column_record.column_name);
+            
+            -- Insert enum column mapping
+            EXECUTE 'INSERT INTO ' || target_schema || '.' || column_mapping_table_name || 
+                    ' (source_column_name, bak_column_name, source_pgsql_data_type, bak_pgsql_data_type, enum_name) VALUES (''' ||
+                    column_record.column_name || ''', ''' || column_record.column_name || ''', ''' ||
+                    column_record.udt_name || ''', ''text'', ''' || column_record.udt_name || ''')';
         ELSE
             -- Regular column
             IF select_clause != '' THEN
                 select_clause := select_clause || ', ';
             END IF;
             select_clause := select_clause || column_record.column_name;
+            
+            -- Insert regular column mapping
+            EXECUTE 'INSERT INTO ' || target_schema || '.' || column_mapping_table_name || 
+                    ' (source_column_name, bak_column_name, source_pgsql_data_type, bak_pgsql_data_type, enum_name) VALUES (''' ||
+                    column_record.column_name || ''', ''' || column_record.column_name || ''', ''' ||
+                    column_record.data_type || ''', ''' || column_record.data_type || ''', NULL)';
         END IF;
     END LOOP;
-
-    -- Create the new table name with format
-    new_table_name := source_schema || '_' || table_to_backup || '_' || current_date_str;
 
     -- Create a copy of the table in the target schema with enum conversion
     EXECUTE 'CREATE TABLE ' || target_schema || '.' || new_table_name || ' AS
@@ -95,10 +138,12 @@ BEGIN
                      source_schema, table_to_backup;
     END IF;
 
+    RAISE NOTICE 'Created metadata table: %.%', target_schema, metadata_table_name;
+    RAISE NOTICE 'Created column mapping table: %.%', target_schema, column_mapping_table_name;
     RAISE NOTICE 'Backup complete for table "%"', table_to_backup;
 END
 $$;
 
 --------------------------------------------------------------------------------
--- end of bak.sql
+-- end of backup script
 --------------------------------------------------------------------------------
