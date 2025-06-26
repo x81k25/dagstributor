@@ -21,6 +21,7 @@ from dagstributor.wiring_schema_tics.jobs import (
     wst_atp_drop_job,
     wst_atp_instantiate_job,
     wst_atp_reload_job,
+    wst_atp_bak_drop_reload_job,
 )
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -57,6 +58,7 @@ def dagstributor_repo():
         wst_atp_drop_job,
         wst_atp_instantiate_job,
         wst_atp_reload_job,
+        wst_atp_bak_drop_reload_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,
