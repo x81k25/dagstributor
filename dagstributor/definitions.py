@@ -1,6 +1,6 @@
 """Central Dagster definitions for the dagstributor project."""
 
-from dagster import Definitions
+from dagster import Definitions, EnvVar
 from .resources import postgres_resource
 
 # All assets have been removed
@@ -71,11 +71,11 @@ at_schedules = [
 # Configure resources
 resources = {
     "postgres": postgres_resource.configured({
-        "host": {"env": "WST_PGSQL_HOST"},
-        "port": {"env": "WST_PGSQL_PORT"},
-        "database": {"env": "WST_PGSQL_DATABASE"},
-        "user": {"env": "WST_PGSQL_USERNAME"},
-        "password": {"env": "WST_PGSQL_PASSWORD"},
+        "host": EnvVar("WST_PGSQL_HOST"),
+        "port": EnvVar("WST_PGSQL_PORT"),
+        "database": EnvVar("WST_PGSQL_DATABASE"),
+        "user": EnvVar("WST_PGSQL_USERNAME"),
+        "password": EnvVar("WST_PGSQL_PASSWORD"),
     })
 }
 

@@ -10,7 +10,7 @@ def postgres_resource(context):
     
     connection = psycopg2.connect(
         host=config["host"],
-        port=config["port"],
+        port=int(config["port"]),
         database=config["database"],
         user=config["user"],
         password=config["password"],
