@@ -37,6 +37,9 @@ from .automatic_transmission.schedules import (
     at_09_transfer_schedule,
     at_10_cleanup_schedule,
 )
+from .wiring_schema_tics.schedules import (
+    wst_atp_bak_schedule,
+)
 
 # All assets have been removed
 all_assets = []
@@ -57,7 +60,7 @@ at_jobs = [
 ]
 
 # Define wiring schema-tics jobs
-ws_jobs = [
+wst_jobs = [
     test_db_connection_job,
     wst_atp_bak_job,
     wst_atp_drop_job,
@@ -80,6 +83,11 @@ at_schedules = [
     at_10_cleanup_schedule,
 ]
 
+# Define wiring schema-tics schedules
+wst_schedules = [
+    wst_atp_bak_schedule,
+]
+
 # Configure resources
 resources = {
     "postgres": postgres_resource
@@ -88,7 +96,7 @@ resources = {
 # Create the Definitions object
 defs = Definitions(
     assets=all_assets,
-    jobs=at_jobs + ws_jobs,
-    schedules=at_schedules,
+    jobs=at_jobs + wst_jobs,
+    schedules=at_schedules + wst_schedules,
     resources=resources,
 )

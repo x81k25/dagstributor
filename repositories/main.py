@@ -52,7 +52,7 @@ def dagstributor_repo():
         at_08_download_check_job,
         at_09_transfer_job,
         at_10_cleanup_job,
-        # Wiring schema-tics jobs
+        # Wiring schema-tics (wst) jobs
         test_db_connection_job,
         wst_atp_bak_job,
         wst_atp_drop_job,
