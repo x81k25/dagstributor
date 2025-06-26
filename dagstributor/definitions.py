@@ -71,7 +71,7 @@ at_schedules = [
 # Configure resources
 resources = {
     "postgres": postgres_resource.configured({
-        "host": {"env": "WST_PGSQL_ENDPOINT"},
+        "host": {"env": "WST_PGSQL_HOST"},
         "port": {"env": "WST_PGSQL_PORT"},
         "database": {"env": "WST_PGSQL_DATABASE"},
         "user": {"env": "WST_PGSQL_USERNAME"},
