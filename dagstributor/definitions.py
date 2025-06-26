@@ -1,6 +1,7 @@
 """Central Dagster definitions for the dagstributor project."""
 
 from dagster import Definitions
+from ..resources import postgres_resource
 
 # All assets have been removed
 from .automatic_transmission.jobs import (
@@ -16,6 +17,7 @@ from .automatic_transmission.jobs import (
     at_10_cleanup_job,
     at_full_pipeline_job,
 )
+from .wiring_schema_tics.jobs import test_db_connection_job
 from .automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
     at_02_collect_schedule,
@@ -47,6 +49,11 @@ at_jobs = [
     at_full_pipeline_job,
 ]
 
+# Define wiring schema-tics jobs
+ws_jobs = [
+    test_db_connection_job,
+]
+
 # Define all automatic transmission schedules
 at_schedules = [
     at_01_rss_ingest_schedule,
@@ -61,9 +68,21 @@ at_schedules = [
     at_10_cleanup_schedule,
 ]
 
+# Configure resources
+resources = {
+    "postgres": postgres_resource.configured({
+        "host": {"env": "WST_PGSQL_ENDPOINT"},
+        "port": {"env": "WST_PGSQL_PORT"},
+        "database": {"env": "WST_PGSQL_DATABASE"},
+        "user": {"env": "WST_PGSQL_USERNAME"},
+        "password": {"env": "WST_PGSQL_PASSWORD"},
+    })
+}
+
 # Create the Definitions object
 defs = Definitions(
     assets=all_assets,
-    jobs=at_jobs,
+    jobs=at_jobs + ws_jobs,
     schedules=at_schedules,
+    resources=resources,
 )
