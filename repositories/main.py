@@ -1,6 +1,7 @@
 """Main repository definition for dagstributor project."""
 
 from dagster import repository
+from dagstributor.resources import postgres_resource
 
 from dagstributor.automatic_transmission.jobs import (
     at_01_rss_ingest_job,
@@ -13,6 +14,14 @@ from dagstributor.automatic_transmission.jobs import (
     at_08_download_check_job,
     at_09_transfer_job,
     at_10_cleanup_job,
+)
+from dagstributor.wiring_schema_tics.jobs import (
+    test_db_connection_job,
+    wst_atp_bak_job,
+    wst_atp_drop_job,
+    wst_atp_instantiate_job,
+    wst_atp_reload_job,
+    wst_atp_bak_drop_reload_job,
 )
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -43,6 +52,13 @@ def dagstributor_repo():
         at_08_download_check_job,
         at_09_transfer_job,
         at_10_cleanup_job,
+        # Wiring schema-tics (wst) jobs
+        test_db_connection_job,
+        wst_atp_bak_job,
+        wst_atp_drop_job,
+        wst_atp_instantiate_job,
+        wst_atp_reload_job,
+        wst_atp_bak_drop_reload_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,

@@ -8,18 +8,85 @@ Dagstributor is a comprehensive data pipeline system that automates the ingestio
 
 ## Architecture
 
-The system consists of 10 sequential jobs that form a complete data processing pipeline:
+The system consists of two main components:
 
-1. **RSS Ingest** - Fetches content from RSS feeds
-2. **Collect** - Gathers data from ingested feeds
-3. **Parse** - Processes and extracts structured data
-4. **File Filtration** - Filters files based on criteria
-5. **Metadata Collection** - Extracts and enriches metadata
-6. **Media Filtration** - Filters media content
-7. **Initiation** - Initiates download processes
-8. **Download Check** - Monitors download progress
-9. **Transfer** - Transfers completed downloads
-10. **Cleanup** - Removes temporary files and data
+### Automatic Transmission Pipeline (11 jobs)
+
+Sequential data processing pipeline:
+1. **at_01_rss_ingest_job** - Fetches content from RSS feeds
+2. **at_02_collect_job** - Gathers data from ingested feeds
+3. **at_03_parse_job** - Processes and extracts structured data
+4. **at_04_file_filtration_job** - Filters files based on criteria
+5. **at_05_metadata_collection_job** - Extracts and enriches metadata
+6. **at_06_media_filtration_job** - Filters media content
+7. **at_07_initiation_job** - Initiates download processes
+8. **at_08_download_check_job** - Monitors download progress
+9. **at_09_transfer_job** - Transfers completed downloads
+10. **at_10_cleanup_job** - Removes temporary files and data
+11. **at_full_pipeline_job** - Executes the complete pipeline sequence
+
+### Wiring Schema Tics (6 jobs)
+
+Database schema management system for PostgreSQL ATP (Automatic Transmission Pipeline) database operations.
+
+### Wiring Schema Tics Module
+
+The `wiring_schema_tics` module provides database schema management capabilities for the system:
+
+#### Available Jobs
+
+1. **test_db_connection_job** - Tests database connectivity with a simple query
+2. **wst_atp_bak_job** - Executes all backup ATP scripts for schema backup
+3. **wst_atp_drop_job** - Drops the atp schema (WARNING: deletes all data!)
+4. **wst_atp_instantiate_job** - Creates the atp schema with all tables and permissions
+5. **wst_atp_reload_job** - Restores data from backup tables into atp schema
+6. **wst_atp_bak_drop_reload_job** - Complete backup, drop, instantiate, and reload sequence
+
+#### SQL Scripts Organization
+
+- **ddl/** - Data Definition Language scripts for schema creation
+  - `00_drop_schema.sql` - Drops existing atp schema
+  - `01_instantiate_media.sql` - Creates media tables within atp schema
+  - `02_instantiate_training.sql` - Creates training tables within atp schema
+  - `03_instantiate_prediction.sql` - Creates prediction tables within atp schema
+  - `10_set_perms.sql` - Sets permissions on atp schema objects
+
+- **bak/** - Backup and restore scripts
+  - `bak_media.sql` - Backs up atp.media table
+  - `bak_training.sql` - Backs up atp.training table
+  - `bak_prediction.sql` - Backs up atp.prediction table
+  - `reload_media.sql` - Restores atp.media table from backup
+  - `reload_training.sql` - Restores atp.training table from backup
+  - `reload_prediction.sql` - Restores atp.prediction table from backup
+
+- **test.sql** - Simple database connection test script
+
+#### SQL Execution Pattern
+
+All ops in the wiring_schema_tics module follow a consistent pattern for executing SQL scripts:
+
+1. **Script Loading**: SQL files are loaded from the `sql/` directory relative to the ops module
+2. **Database Connection**: Uses psycopg2 with environment variables (WST_PGSQL_*)
+3. **Execution Strategy**:
+   - Scripts with dollar-quoted strings (`$$`) are executed as a single block
+   - Other scripts are split on semicolons and executed statement by statement
+   - Autocommit is enabled for DDL operations
+4. **Error Handling**: Detailed logging of each statement execution with proper error reporting
+5. **Result Collection**: 
+   - SELECT statements return rows as RealDictCursor results
+   - Non-SELECT statements report affected row counts
+   - All ops return structured output with execution metadata
+
+Example pattern used by all ops:
+```python
+def execute_sql_file(context, sql_filename):
+    # 1. Load SQL file from sql/ directory
+    # 2. Connect to database using environment variables
+    # 3. Execute statements (single block for $$ or split on ;)
+    # 4. Return results with metadata
+```
+
+This standardized approach ensures consistent behavior across all database operations.
 
 ## Project Structure
 
@@ -28,23 +95,31 @@ dagstributor/
 ├── config/
 │   ├── dagster.yaml             # Dagster infrastructure configuration
 │   └── schedules/               # Environment-specific schedule configs
-│       ├── base.yaml            # Base schedule configuration
-│       ├── dev.yaml             # Development overrides
-│       ├── stg.yaml             # Staging overrides
-│       └── prod.yaml            # Production overrides
+│       ├── dev.yaml             # Development schedule settings
+│       ├── stg.yaml             # Staging schedule settings
+│       └── prod.yaml            # Production schedule settings
 ├── dagstributor/
-│   └── automatic_transmission/
-│       ├── __init__.py
-│       ├── assets.py            # Asset definitions
-│       ├── ops.py               # Operation implementations
-│       ├── jobs.py              # Job definitions
-│       ├── schedules.py         # Schedule configurations
-│       └── config_loader.py     # YAML config loader
+│   ├── automatic_transmission/  # Automatic Transmission pipeline (10 jobs)
+│   │   ├── __init__.py
+│   │   ├── config_loader.py     # YAML schedule config loader
+│   │   ├── jobs.py              # Job definitions (at_01 through at_10 + full pipeline)
+│   │   ├── ops.py               # K8s operation implementations
+│   │   └── schedules.py         # Schedule configurations
+│   ├── wiring_schema_tics/      # Database schema management (6 jobs)
+│   │   ├── __init__.py
+│   │   ├── jobs.py              # Database management jobs
+│   │   ├── ops.py               # Database operation implementations
+│   │   ├── schedules.py         # WST schedule configurations
+│   │   └── sql/                 # SQL scripts directory
+│   │       ├── bak/             # Backup and restore scripts
+│   │       └── ddl/             # Schema definition scripts
+│   ├── definitions.py           # Main Dagster definitions
+│   └── resources/               # Resource configurations
 ├── repositories/
 │   └── main.py                  # Main Dagster repository
-├── tests/                       # Unit and integration tests
+├── pyproject.toml               # Python project configuration
 ├── requirements.txt             # Python dependencies
-└── setup.py                     # Package setup configuration
+└── workspace.yaml               # Dagster workspace configuration
 ```
 
 ## Environment Configuration
@@ -55,6 +130,15 @@ The system supports three environments with GitOps-based configuration:
 - **prod** - Production environment
 
 Schedule configurations are loaded based on the `ENVIRONMENT` variable and can be customized per environment through YAML files.
+
+### Database Configuration
+
+The wiring_schema_tics module requires the following PostgreSQL environment variables:
+- `WST_PGSQL_HOST` - Database host
+- `WST_PGSQL_PORT` - Database port (default: 5432)
+- `WST_PGSQL_DATABASE` - Database name
+- `WST_PGSQL_USERNAME` - Database username
+- `WST_PGSQL_PASSWORD` - Database password
 
 ## Local Development
 
@@ -99,6 +183,14 @@ dagster job list -f repositories/main.py
 
 # Execute a specific job
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job
+
+# Execute wiring schema tics jobs
+dagster job execute -f repositories/main.py -j test_db_connection_job
+dagster job execute -f repositories/main.py -j wst_atp_bak_job
+dagster job execute -f repositories/main.py -j wst_atp_drop_job
+dagster job execute -f repositories/main.py -j wst_atp_instantiate_job
+dagster job execute -f repositories/main.py -j wst_atp_reload_job
+dagster job execute -f repositories/main.py -j wst_atp_bak_drop_reload_job
 
 # Run with custom config
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job -c config.yaml
@@ -154,6 +246,11 @@ schedules:
   at_01_rss_ingest:
     enabled: true
     cron_schedule: "0 * * * *"  # Every hour
+    default_status: "RUNNING"
+    
+  wst_atp_bak:
+    enabled: true
+    cron_schedule: "57 4 * * 0"  # Weekly on Sunday at 4:57 AM (prod)
     default_status: "RUNNING"
 ```
 
