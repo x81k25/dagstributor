@@ -1,4 +1,5 @@
-from dagster import op, Out, Output, job, execute_in_process
+from dagster import op, Out, Output, job
+from dagster._core.execution.api import execute_job
 from pathlib import Path
 import psycopg2
 import psycopg2.extras
@@ -248,7 +249,7 @@ def wst_atp_bak_op(context):
     context.log.info("Starting backup operations via job execution")
     
     try:
-        result = execute_in_process(backup_job)
+        result = execute_job(backup_job)
         
         context.log.info(f"Backup job completed. Success: {result.success}")
         
@@ -279,7 +280,7 @@ def wst_atp_instantiate_op(context):
     context.log.info("Starting instantiate operations via job execution")
     
     try:
-        result = execute_in_process(instantiate_job)
+        result = execute_job(instantiate_job)
         
         context.log.info(f"Instantiate job completed. Success: {result.success}")
         
@@ -310,7 +311,7 @@ def wst_atp_reload_op(context):
     context.log.info("Starting reload operations via job execution")
     
     try:
-        result = execute_in_process(reload_job)
+        result = execute_job(reload_job)
         
         context.log.info(f"Reload job completed. Success: {result.success}")
         
@@ -341,7 +342,7 @@ def wst_atp_bak_drop_reload_op(context):
     context.log.info("Starting complete backup, drop, instantiate, and reload sequence via job execution")
     
     try:
-        result = execute_in_process(bak_drop_reload_sequence_job)
+        result = execute_job(bak_drop_reload_sequence_job)
         
         context.log.info(f"Full sequence job completed. Success: {result.success}")
         
