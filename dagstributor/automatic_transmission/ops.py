@@ -13,8 +13,20 @@ def get_image_tag():
 BASE_K8S_CONFIG = {
     "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
-    "env_config_maps": ["at-config", "environment"],
-    "env_secrets": ["at-sensitive"],
+    "env_config_maps": [
+        "at-config",
+        "environment",
+        "transmission-config",
+        "rear-diff-config",
+        "reel-driver-config",
+        "wst-config"
+    ],
+    "env_secrets": [
+        "at-secrets",
+        "transmission-secrets",
+        "rear-diff-secrets",
+        "wst-secrets"
+    ],
     "job_spec_config": {
         "activeDeadlineSeconds": 60,  # 60 seconds global K8s operation timeout
         "backoffLimit": 0
@@ -87,9 +99,9 @@ at_08_download_check_op = k8s_job_op.configured(
 )
 
 # Get environment-specific paths from ConfigMap environment variables
-DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR')
-MOVIE_DIR = os.getenv('MOVIE_DIR')
-TV_SHOW_DIR = os.getenv('TV_SHOW_DIR')
+DOWNLOAD_DIR = os.getenv('AT_DOWNLOAD_DIR')
+MOVIE_DIR = os.getenv('AT_MOVIE_DIR')
+TV_SHOW_DIR = os.getenv('AT_TV_SHOW_DIR')
 
 at_09_transfer_op = k8s_job_op.configured(
     {
