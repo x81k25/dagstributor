@@ -73,6 +73,6 @@ def wst_atp_bak_drop_reload_job():
     perms_result = wst_atp_set_perms_op(prediction_instantiate)
     
     # Reload - sequential execution
-    media_reload = wst_atp_reload_media_op(perms_result)
-    training_reload = wst_atp_reload_training_op(media_reload)
-    wst_atp_reload_prediction_op(training_reload)
+    wst_atp_reload_media_op(perms_result)
+    wst_atp_reload_training_op(perms_result)
+    wst_atp_reload_prediction_op(perms_result)
