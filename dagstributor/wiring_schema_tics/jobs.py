@@ -41,10 +41,10 @@ def wst_atp_drop_job():
 @job(description="Instantiate the atp schema with all tables and permissions")
 def wst_atp_instantiate_job():
     """Job to create the atp schema with media, training, prediction tables and set permissions."""
-    wst_atp_instantiate_media_op()
-    wst_atp_instantiate_training_op()
-    wst_atp_instantiate_prediction_op()
-    wst_atp_set_perms_op()
+    media_result = wst_atp_instantiate_media_op()
+    training_result = wst_atp_instantiate_training_op(media_result)
+    prediction_result = wst_atp_instantiate_prediction_op(training_result)
+    wst_atp_set_perms_op(prediction_result)
 
 
 @job(description="Reload data from backup into atp schema tables")
@@ -58,21 +58,21 @@ def wst_atp_reload_job():
 @job(description="Complete backup, drop, instantiate, and reload sequence")
 def wst_atp_bak_drop_reload_job():
     """Job to execute complete backup, drop schema, recreate schema, and reload data sequence."""
-    # Backup
-    wst_atp_bak_media_op()
-    wst_atp_bak_prediction_op()
-    wst_atp_bak_training_op()
+    # Backup - these can run in parallel since they're independent
+    media_bak = wst_atp_bak_media_op()
+    prediction_bak = wst_atp_bak_prediction_op()
+    training_bak = wst_atp_bak_training_op()
     
-    # Drop
-    wst_atp_drop_op()
+    # Drop - wait for all backups to complete
+    drop_result = wst_atp_drop_op([media_bak, prediction_bak, training_bak])
     
-    # Instantiate
-    wst_atp_instantiate_media_op()
-    wst_atp_instantiate_training_op()
-    wst_atp_instantiate_prediction_op()
-    wst_atp_set_perms_op()
+    # Instantiate - sequential execution
+    media_instantiate = wst_atp_instantiate_media_op(drop_result)
+    training_instantiate = wst_atp_instantiate_training_op(media_instantiate)
+    prediction_instantiate = wst_atp_instantiate_prediction_op(training_instantiate)
+    perms_result = wst_atp_set_perms_op(prediction_instantiate)
     
-    # Reload
-    wst_atp_reload_media_op()
-    wst_atp_reload_training_op()
-    wst_atp_reload_prediction_op()
+    # Reload - sequential execution
+    media_reload = wst_atp_reload_media_op(perms_result)
+    training_reload = wst_atp_reload_training_op(media_reload)
+    wst_atp_reload_prediction_op(training_reload)
