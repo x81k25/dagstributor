@@ -125,7 +125,10 @@ def execute_sql_file(context, sql_filename):
 
 def create_single_script_op(sql_filename, op_description):
     """Factory function to create a single-script SQL operation."""
-    @op(out=Out(dict))
+    # Generate unique name from filename
+    op_name = sql_filename.replace("/", "_").replace(".sql", "_op")
+    
+    @op(out=Out(dict), name=op_name)
     def sql_op(context):
         try:
             result = execute_sql_file(context, sql_filename)
