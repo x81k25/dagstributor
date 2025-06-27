@@ -140,6 +140,30 @@ The wiring_schema_tics module requires the following PostgreSQL environment vari
 - `WST_PGSQL_USERNAME` - Database username
 - `WST_PGSQL_PASSWORD` - Database password
 
+### Kubernetes Configuration
+
+The Automatic Transmission jobs use the following Kubernetes resources:
+
+#### ConfigMaps
+- `at-config` - AT-specific configuration settings
+- `environment` - Environment-specific settings
+- `transmission-config` - Transmission service configuration
+- `rear-diff-config` - Rear diff service configuration
+- `reel-driver-config` - Reel driver service configuration
+- `wst-config` - Wiring schema tics configuration
+
+#### Secrets
+- `at-secrets` - Sensitive AT configuration (renamed from `at-sensitive`)
+- `transmission-secrets` - Transmission service secrets
+- `rear-diff-secrets` - Rear diff service secrets
+- `wst-secrets` - Wiring schema tics secrets
+
+#### Environment Variables
+AT jobs use the following prefixed environment variables:
+- `AT_DOWNLOAD_DIR` - Download directory path
+- `AT_MOVIE_DIR` - Movie storage directory path
+- `AT_TV_SHOW_DIR` - TV show storage directory path
+
 ## Local Development
 
 ### Prerequisites
