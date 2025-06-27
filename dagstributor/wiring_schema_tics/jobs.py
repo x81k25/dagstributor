@@ -41,10 +41,10 @@ def wst_atp_drop_job():
 @job(description="Instantiate the atp schema with all tables and permissions")
 def wst_atp_instantiate_job():
     """Job to create the atp schema with media, training, prediction tables and set permissions."""
-    media_result = wst_atp_instantiate_media_op()
-    training_result = wst_atp_instantiate_training_op(media_result)
-    prediction_result = wst_atp_instantiate_prediction_op(training_result)
-    wst_atp_set_perms_op(prediction_result)
+    wst_atp_instantiate_media_op()
+    wst_atp_instantiate_training_op()
+    wst_atp_instantiate_prediction_op()
+    wst_atp_set_perms_op()
 
 
 @job(description="Reload data from backup into atp schema tables")
@@ -63,16 +63,29 @@ def wst_atp_bak_drop_reload_job():
     prediction_bak = wst_atp_bak_prediction_op()
     training_bak = wst_atp_bak_training_op()
     
-    # Drop - wait for all backups to complete
-    drop_result = wst_atp_drop_op([media_bak, prediction_bak, training_bak])
+    # Drop schema - wait for all backups to complete
+    drop_result = wst_atp_drop_op()
+    drop_result.depends_on(media_bak, prediction_bak, training_bak)
     
-    # Instantiate - sequential execution
-    media_instantiate = wst_atp_instantiate_media_op(drop_result)
-    training_instantiate = wst_atp_instantiate_training_op(media_instantiate)
-    prediction_instantiate = wst_atp_instantiate_prediction_op(training_instantiate)
-    perms_result = wst_atp_set_perms_op(prediction_instantiate)
+    # Instantiate schema and tables - run sequentially after drop
+    media_instantiate = wst_atp_instantiate_media_op()
+    media_instantiate.depends_on(drop_result)
     
-    # Reload - sequential execution
-    wst_atp_reload_media_op(perms_result)
-    wst_atp_reload_training_op(perms_result)
-    wst_atp_reload_prediction_op(perms_result)
+    training_instantiate = wst_atp_instantiate_training_op()
+    training_instantiate.depends_on(media_instantiate)
+    
+    prediction_instantiate = wst_atp_instantiate_prediction_op()
+    prediction_instantiate.depends_on(training_instantiate)
+    
+    perms_result = wst_atp_set_perms_op()
+    perms_result.depends_on(prediction_instantiate)
+    
+    # Reload data from backups - run after schema is fully instantiated
+    media_reload = wst_atp_reload_media_op()
+    media_reload.depends_on(perms_result)
+    
+    training_reload = wst_atp_reload_training_op()
+    training_reload.depends_on(perms_result)
+    
+    prediction_reload = wst_atp_reload_prediction_op()
+    prediction_reload.depends_on(perms_result)
