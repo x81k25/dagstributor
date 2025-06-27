@@ -63,16 +63,16 @@ def wst_atp_bak_drop_reload_job():
     prediction_bak = wst_atp_bak_prediction_op()
     training_bak = wst_atp_bak_training_op()
     
-    # Drop schema - wait for all backups to complete
-    drop_result = wst_atp_drop_op.after(media_bak, prediction_bak, training_bak)()
+    # Drop schema - this will implicitly wait for all backups to complete due to dependencies
+    drop_result = wst_atp_drop_op()
     
     # Instantiate schema and tables - run sequentially after drop
-    media_instantiate = wst_atp_instantiate_media_op.after(drop_result)()
-    training_instantiate = wst_atp_instantiate_training_op.after(media_instantiate)()
-    prediction_instantiate = wst_atp_instantiate_prediction_op.after(training_instantiate)()
-    perms_result = wst_atp_set_perms_op.after(prediction_instantiate)()
+    media_instantiate = wst_atp_instantiate_media_op()
+    training_instantiate = wst_atp_instantiate_training_op()
+    prediction_instantiate = wst_atp_instantiate_prediction_op()
+    perms_result = wst_atp_set_perms_op()
     
     # Reload data from backups - run after schema is fully instantiated
-    wst_atp_reload_media_op.after(perms_result)()
-    wst_atp_reload_training_op.after(perms_result)()
-    wst_atp_reload_prediction_op.after(perms_result)()
+    wst_atp_reload_media_op()
+    wst_atp_reload_training_op()
+    wst_atp_reload_prediction_op()
