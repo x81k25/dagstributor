@@ -196,9 +196,9 @@ def backup_job():
 def instantiate_job():
     """Job that runs instantiate operations sequentially."""
     media_result = wst_atp_instantiate_media_op()
-    training_result = wst_atp_instantiate_training_op()
-    prediction_result = wst_atp_instantiate_prediction_op()
-    wst_atp_set_perms_op()
+    training_result = wst_atp_instantiate_training_op().after(media_result)
+    prediction_result = wst_atp_instantiate_prediction_op().after(training_result)
+    wst_atp_set_perms_op().after(prediction_result)
 
 
 @job
@@ -212,37 +212,24 @@ def reload_job():
 @job
 def bak_drop_reload_sequence_job():
     """Job that runs complete backup, drop, instantiate, and reload sequence."""
-    # Backup
+    # Backup (parallel)
     media_bak = wst_atp_bak_media_op()
     prediction_bak = wst_atp_bak_prediction_op()
     training_bak = wst_atp_bak_training_op()
     
     # Drop (after backup completes)
-    drop_result = wst_atp_drop_op()
-    drop_result.add_dependencies([media_bak, prediction_bak, training_bak])
+    drop_result = wst_atp_drop_op().after(media_bak, prediction_bak, training_bak)
     
-    # Instantiate (after drop completes)
-    media_inst = wst_atp_instantiate_media_op()
-    media_inst.add_dependency(drop_result)
+    # Instantiate (sequential after drop completes)
+    media_inst = wst_atp_instantiate_media_op().after(drop_result)
+    training_inst = wst_atp_instantiate_training_op().after(media_inst)
+    prediction_inst = wst_atp_instantiate_prediction_op().after(training_inst)
+    perms_result = wst_atp_set_perms_op().after(prediction_inst)
     
-    training_inst = wst_atp_instantiate_training_op()
-    training_inst.add_dependency(media_inst)
-    
-    prediction_inst = wst_atp_instantiate_prediction_op()
-    prediction_inst.add_dependency(training_inst)
-    
-    perms_result = wst_atp_set_perms_op()
-    perms_result.add_dependency(prediction_inst)
-    
-    # Reload (after instantiate completes)
-    media_reload = wst_atp_reload_media_op()
-    media_reload.add_dependency(perms_result)
-    
-    training_reload = wst_atp_reload_training_op()
-    training_reload.add_dependency(perms_result)
-    
-    prediction_reload = wst_atp_reload_prediction_op()
-    prediction_reload.add_dependency(perms_result)
+    # Reload (parallel after instantiate completes)
+    wst_atp_reload_media_op().after(perms_result)
+    wst_atp_reload_training_op().after(perms_result)
+    wst_atp_reload_prediction_op().after(perms_result)
 
 
 # Composite ops - these call jobs that run multiple ops
