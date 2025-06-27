@@ -1,0 +1,90 @@
+{
+  "atp_schema": {
+    "name": "atp",
+    "tables": {
+      "media": {
+        "columns": [
+          {"name": "hash", "type": "CHAR(40)", "constraints": ["PRIMARY KEY"], "check": "hash ~ '^[a-f0-9]+$' AND length(hash) = 40"},
+          {"name": "media_type", "type": "media_type", "constraints": ["NOT NULL"]},
+          {"name": "media_title", "type": "VARCHAR(255)", "constraints": []},
+          {"name": "season", "type": "INTEGER", "constraints": []},
+          {"name": "episode", "type": "INTEGER", "constraints": []},
+          {"name": "release_year", "type": "INTEGER", "constraints": [], "check": "release_year BETWEEN 1850 AND 2100"},
+          {"name": "pipeline_status", "type": "pipeline_status", "constraints": ["NOT NULL"], "default": "'ingested'"},
+          {"name": "error_status", "type": "BOOLEAN", "constraints": ["NOT NULL"], "default": "FALSE"},
+          {"name": "error_condition", "type": "TEXT", "constraints": []},
+          {"name": "rejection_status", "type": "rejection_status", "constraints": ["NOT NULL"], "default": "'unfiltered'"},
+          {"name": "rejection_reason", "type": "TEXT", "constraints": []},
+          {"name": "parent_path", "type": "TEXT", "constraints": []},
+          {"name": "target_path", "type": "TEXT", "constraints": []},
+          {"name": "original_title", "type": "TEXT", "constraints": ["NOT NULL"]},
+          {"name": "original_path", "type": "TEXT", "constraints": []},
+          {"name": "original_link", "type": "TEXT", "constraints": []},
+          {"name": "rss_source", "type": "rss_source", "constraints": []},
+          {"name": "uploader", "type": "VARCHAR(25)", "constraints": []},
+          {"name": "imdb_id", "type": "VARCHAR(10)", "constraints": [], "check": "imdb_id ~ '^tt[0-9]{7,8}$'"},
+          {"name": "tmdb_id", "type": "INTEGER", "constraints": [], "check": "tmdb_id > 0"},
+          {"name": "budget", "type": "BIGINT", "constraints": [], "check": "budget >= 0"},
+          {"name": "revenue", "type": "BIGINT", "constraints": [], "check": "revenue >= 0"},
+          {"name": "runtime", "type": "INTEGER", "constraints": [], "check": "runtime >= 0"},
+          {"name": "origin_country", "type": "CHAR(2)[]", "constraints": []},
+          {"name": "production_companies", "type": "VARCHAR(255)[]", "constraints": []},
+          {"name": "production_countries", "type": "CHAR(2)[]", "constraints": []},
+          {"name": "production_status", "type": "VARCHAR(25)", "constraints": []},
+          {"name": "original_language", "type": "CHAR(2)", "constraints": []},
+          {"name": "spoken_languages", "type": "CHAR(2)[]", "constraints": []},
+          {"name": "genre", "type": "VARCHAR(20)[]", "constraints": []},
+          {"name": "original_media_title", "type": "VARCHAR(255)", "constraints": []},
+          {"name": "tagline", "type": "VARCHAR(255)", "constraints": []},
+          {"name": "overview", "type": "TEXT", "constraints": []},
+          {"name": "tmdb_rating", "type": "DECIMAL(5,3)", "constraints": [], "check": "tmdb_rating BETWEEN 0 AND 10"},
+          {"name": "tmdb_votes", "type": "INTEGER", "constraints": [], "check": "tmdb_votes >= 0"},
+          {"name": "rt_score", "type": "INTEGER", "constraints": [], "check": "rt_score IS NULL OR (rt_score BETWEEN 0 AND 100)"},
+          {"name": "metascore", "type": "INTEGER", "constraints": [], "check": "metascore IS NULL OR (metascore BETWEEN 0 AND 100)"},
+          {"name": "imdb_rating", "type": "DECIMAL(4,1)", "constraints": [], "check": "imdb_rating IS NULL OR (imdb_rating BETWEEN 0 AND 100)"},
+          {"name": "imdb_votes", "type": "INTEGER", "constraints": [], "check": "imdb_votes >= 0"},
+          {"name": "resolution", "type": "VARCHAR(10)", "constraints": []},
+          {"name": "video_codec", "type": "VARCHAR(10)", "constraints": []},
+          {"name": "upload_type", "type": "VARCHAR(10)", "constraints": []},
+          {"name": "audio_codec", "type": "VARCHAR(10)", "constraints": []},
+          {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')"},
+          {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "(CURRENT_TIMESTAMP AT TIME ZONE 'UTC')"}
+        ],
+        "indexes": [
+          {"name": "idx_media_imdb_id", "columns": ["imdb_id"]},
+          {"name": "idx_media_tmdb_id", "columns": ["tmdb_id"]},
+          {"name": "idx_media_pipeline_status", "columns": ["pipeline_status"]}
+        ]
+      },
+      "training": {
+        "columns": [
+          {"name": "hash", "type": "CHAR(40)", "constraints": ["PRIMARY KEY"]},
+          {"name": "training_data", "type": "JSONB", "constraints": []},
+          {"name": "model_version", "type": "VARCHAR(50)", "constraints": []},
+          {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "CURRENT_TIMESTAMP"},
+          {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "CURRENT_TIMESTAMP"}
+        ]
+      },
+      "prediction": {
+        "columns": [
+          {"name": "hash", "type": "CHAR(40)", "constraints": ["PRIMARY KEY"]},
+          {"name": "prediction_score", "type": "DECIMAL(5,3)", "constraints": []},
+          {"name": "confidence", "type": "DECIMAL(5,3)", "constraints": []},
+          {"name": "model_version", "type": "VARCHAR(50)", "constraints": []},
+          {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "CURRENT_TIMESTAMP"},
+          {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE", "constraints": ["NOT NULL"], "default": "CURRENT_TIMESTAMP"}
+        ]
+      }
+    },
+    "enums": [
+      {"name": "media_type", "values": ["movie", "tv_show", "tv_season", "unknown"]},
+      {"name": "pipeline_status", "values": ["ingested", "paused", "parsed", "rejected", "file_accepted", "metadata_collected", "media_accepted", "downloading", "downloaded", "transferred", "complete"]},
+      {"name": "rejection_status", "values": ["unfiltered", "accepted", "rejected", "override"]},
+      {"name": "rss_source", "values": ["yts.mx", "episodefeed.com"]}
+    ]
+  },
+  "bak_schema": {
+    "name": "bak",
+    "tables": {}
+  }
+}
