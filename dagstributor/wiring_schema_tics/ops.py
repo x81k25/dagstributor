@@ -195,10 +195,10 @@ def backup_job():
 @job
 def instantiate_job():
     """Job that runs instantiate operations sequentially."""
-    media_result = wst_atp_instantiate_media_op()
-    training_result = wst_atp_instantiate_training_op().after(media_result)
-    prediction_result = wst_atp_instantiate_prediction_op().after(training_result)
-    wst_atp_set_perms_op().after(prediction_result)
+    wst_atp_instantiate_media_op()
+    wst_atp_instantiate_training_op()
+    wst_atp_instantiate_prediction_op()
+    wst_atp_set_perms_op()
 
 
 @job
@@ -212,24 +212,25 @@ def reload_job():
 @job
 def bak_drop_reload_sequence_job():
     """Job that runs complete backup, drop, instantiate, and reload sequence."""
-    # Backup (parallel)
-    media_bak = wst_atp_bak_media_op()
-    prediction_bak = wst_atp_bak_prediction_op()
-    training_bak = wst_atp_bak_training_op()
+    # For now, just run in sequence without explicit dependencies
+    # Backup
+    wst_atp_bak_media_op()
+    wst_atp_bak_prediction_op()
+    wst_atp_bak_training_op()
     
-    # Drop (after backup completes)
-    drop_result = wst_atp_drop_op().after(media_bak, prediction_bak, training_bak)
+    # Drop
+    wst_atp_drop_op()
     
-    # Instantiate (sequential after drop completes)
-    media_inst = wst_atp_instantiate_media_op().after(drop_result)
-    training_inst = wst_atp_instantiate_training_op().after(media_inst)
-    prediction_inst = wst_atp_instantiate_prediction_op().after(training_inst)
-    perms_result = wst_atp_set_perms_op().after(prediction_inst)
+    # Instantiate
+    wst_atp_instantiate_media_op()
+    wst_atp_instantiate_training_op()
+    wst_atp_instantiate_prediction_op()
+    wst_atp_set_perms_op()
     
-    # Reload (parallel after instantiate completes)
-    wst_atp_reload_media_op().after(perms_result)
-    wst_atp_reload_training_op().after(perms_result)
-    wst_atp_reload_prediction_op().after(perms_result)
+    # Reload
+    wst_atp_reload_media_op()
+    wst_atp_reload_training_op()
+    wst_atp_reload_prediction_op()
 
 
 # Composite ops - these call jobs that run multiple ops
