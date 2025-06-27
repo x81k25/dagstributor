@@ -1,10 +1,9 @@
-from dagster import op, Out, Output
+from dagster import op, Out, Output, job, execute_in_process
 from pathlib import Path
 import psycopg2
 import psycopg2.extras
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def execute_sql_file(context, sql_filename):
@@ -157,137 +156,6 @@ def create_single_script_op(sql_filename, op_description):
     return sql_op
 
 
-def execute_ops_simultaneously(context, ops_list, operation_type):
-    """Execute multiple ops simultaneously regardless of failure."""
-    results = []
-    context.log.info(f"Starting simultaneous {operation_type} operations")
-    
-    def execute_op(op_func, op_name):
-        """Execute individual op in thread."""
-        try:
-            # Create a mock context for the individual op
-            mock_context = type('MockContext', (), {
-                'log': context.log,
-                'run_id': context.run_id if hasattr(context, 'run_id') else 'mock_run'
-            })()
-            
-            result = op_func(mock_context)
-            return {
-                "op_name": op_name,
-                "status": "success",
-                "result": result.value
-            }
-        except Exception as e:
-            context.log.error(f"{operation_type.capitalize()} operation {op_name} failed: {str(e)}")
-            return {
-                "op_name": op_name,
-                "status": "failed",
-                "error": str(e)
-            }
-    
-    with ThreadPoolExecutor(max_workers=len(ops_list)) as executor:
-        future_to_op = {executor.submit(execute_op, op_func, op_name): op_name 
-                       for op_func, op_name in ops_list}
-        
-        for future in as_completed(future_to_op):
-            op_name = future_to_op[future]
-            try:
-                result = future.result()
-                results.append(result)
-                context.log.info(f"{operation_type.capitalize()} operation {op_name} completed with status: {result['status']}")
-            except Exception as e:
-                context.log.error(f"{operation_type.capitalize()} operation {op_name} failed with exception: {str(e)}")
-                results.append({
-                    "op_name": op_name,
-                    "status": "failed",
-                    "error": str(e)
-                })
-    
-    successful_ops = [r for r in results if r['status'] == 'success']
-    failed_ops = [r for r in results if r['status'] == 'failed']
-    
-    context.log.info(f"{operation_type.capitalize()} operations completed. Success: {len(successful_ops)}, Failed: {len(failed_ops)}")
-    
-    return Output(
-        value={
-            "status": "completed",
-            "successful_operations": len(successful_ops),
-            "failed_operations": len(failed_ops),
-            "total_operations": len(ops_list),
-            "results": results
-        },
-        metadata={
-            "execution_method": "simultaneous_composite",
-            "successful_operations": len(successful_ops),
-            "failed_operations": len(failed_ops)
-        }
-    )
-
-
-def execute_ops_sequentially(context, ops_list, operation_type):
-    """Execute multiple ops sequentially, stop on first failure."""
-    results = []
-    context.log.info(f"Starting sequential {operation_type} operations")
-    
-    for op_func, op_name in ops_list:
-        try:
-            context.log.info(f"Executing {operation_type} operation: {op_name}")
-            
-            # Create a mock context for the individual op
-            mock_context = type('MockContext', (), {
-                'log': context.log,
-                'run_id': context.run_id if hasattr(context, 'run_id') else 'mock_run'
-            })()
-            
-            result = op_func(mock_context)
-            
-            results.append({
-                "op_name": op_name,
-                "status": "success",
-                "result": result.value
-            })
-            
-            context.log.info(f"{operation_type.capitalize()} operation {op_name} completed successfully")
-            
-        except Exception as e:
-            context.log.error(f"{operation_type.capitalize()} operation {op_name} failed: {str(e)}")
-            results.append({
-                "op_name": op_name,
-                "status": "failed",
-                "error": str(e)
-            })
-            
-            context.log.error(f"Stopping {operation_type} operations due to failure")
-            return Output(
-                value={
-                    "status": "failed",
-                    "failed_operation": op_name,
-                    "completed_operations": len([r for r in results if r['status'] == 'success']),
-                    "total_operations": len(ops_list),
-                    "error": str(e),
-                    "results": results
-                },
-                metadata={
-                    "execution_method": "sequential_composite",
-                    "failed_operation": op_name,
-                    "completed_operations": len([r for r in results if r['status'] == 'success'])
-                }
-            )
-    
-    context.log.info(f"All {operation_type} operations completed successfully. Total: {len(results)}")
-    
-    return Output(
-        value={
-            "status": "success",
-            "completed_operations": len(results),
-            "total_operations": len(ops_list),
-            "results": results
-        },
-        metadata={
-            "execution_method": "sequential_composite",
-            "completed_operations": len(results)
-        }
-    )
 
 
 # Individual script ops using factory function
@@ -311,52 +179,188 @@ wst_atp_reload_training_op = create_single_script_op("bak/reload_training.sql", 
 wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sql", "Prediction reload")
 
 
-# Composite ops - these call other ops, never scripts directly
+# Dynamic jobs for composite operations
+@job
+def backup_job():
+    """Job that runs all backup operations simultaneously."""
+    wst_atp_bak_media_op()
+    wst_atp_bak_prediction_op()
+    wst_atp_bak_training_op()
+
+
+@job
+def instantiate_job():
+    """Job that runs instantiate operations sequentially."""
+    media_result = wst_atp_instantiate_media_op()
+    training_result = wst_atp_instantiate_training_op()
+    prediction_result = wst_atp_instantiate_prediction_op()
+    wst_atp_set_perms_op()
+
+
+@job
+def reload_job():
+    """Job that runs all reload operations simultaneously."""
+    wst_atp_reload_media_op()
+    wst_atp_reload_training_op()
+    wst_atp_reload_prediction_op()
+
+
+@job
+def bak_drop_reload_sequence_job():
+    """Job that runs complete backup, drop, instantiate, and reload sequence."""
+    # Backup
+    media_bak = wst_atp_bak_media_op()
+    prediction_bak = wst_atp_bak_prediction_op()
+    training_bak = wst_atp_bak_training_op()
+    
+    # Drop (after backup completes)
+    drop_result = wst_atp_drop_op()
+    drop_result.add_dependencies([media_bak, prediction_bak, training_bak])
+    
+    # Instantiate (after drop completes)
+    media_inst = wst_atp_instantiate_media_op()
+    media_inst.add_dependency(drop_result)
+    
+    training_inst = wst_atp_instantiate_training_op()
+    training_inst.add_dependency(media_inst)
+    
+    prediction_inst = wst_atp_instantiate_prediction_op()
+    prediction_inst.add_dependency(training_inst)
+    
+    perms_result = wst_atp_set_perms_op()
+    perms_result.add_dependency(prediction_inst)
+    
+    # Reload (after instantiate completes)
+    media_reload = wst_atp_reload_media_op()
+    media_reload.add_dependency(perms_result)
+    
+    training_reload = wst_atp_reload_training_op()
+    training_reload.add_dependency(perms_result)
+    
+    prediction_reload = wst_atp_reload_prediction_op()
+    prediction_reload.add_dependency(perms_result)
+
+
+# Composite ops - these call jobs that run multiple ops
 @op(out=Out(dict))
 def wst_atp_bak_op(context):
     """Execute all backup operations simultaneously regardless of failure."""
-    backup_ops = [
-        (wst_atp_bak_media_op, "media"),
-        (wst_atp_bak_prediction_op, "prediction"),
-        (wst_atp_bak_training_op, "training")
-    ]
+    context.log.info("Starting backup operations via job execution")
     
-    return execute_ops_simultaneously(context, backup_ops, "backup")
+    try:
+        result = execute_in_process(backup_job)
+        
+        context.log.info(f"Backup job completed. Success: {result.success}")
+        
+        return Output(
+            value={
+                "status": "success" if result.success else "failed",
+                "run_id": result.run_id,
+                "success": result.success
+            },
+            metadata={
+                "execution_method": "job_execution",
+                "run_id": result.run_id,
+                "success": result.success
+            }
+        )
+        
+    except Exception as e:
+        context.log.error(f"Backup job execution failed: {str(e)}")
+        return Output(
+            value={"status": "failed", "error": str(e)},
+            metadata={"execution_method": "job_execution"}
+        )
 
 
 @op(out=Out(dict))
 def wst_atp_instantiate_op(context):
-    """Execute instantiate operations sequentially (excluding 00_drop_schema), stop on first failure."""
-    instantiate_ops = [
-        (wst_atp_instantiate_media_op, "media"),
-        (wst_atp_instantiate_training_op, "training"),
-        (wst_atp_instantiate_prediction_op, "prediction"),
-        (wst_atp_set_perms_op, "permissions")
-    ]
+    """Execute instantiate operations sequentially, stop on first failure."""
+    context.log.info("Starting instantiate operations via job execution")
     
-    return execute_ops_sequentially(context, instantiate_ops, "instantiate")
+    try:
+        result = execute_in_process(instantiate_job)
+        
+        context.log.info(f"Instantiate job completed. Success: {result.success}")
+        
+        return Output(
+            value={
+                "status": "success" if result.success else "failed",
+                "run_id": result.run_id,
+                "success": result.success
+            },
+            metadata={
+                "execution_method": "job_execution",
+                "run_id": result.run_id,
+                "success": result.success
+            }
+        )
+        
+    except Exception as e:
+        context.log.error(f"Instantiate job execution failed: {str(e)}")
+        return Output(
+            value={"status": "failed", "error": str(e)},
+            metadata={"execution_method": "job_execution"}
+        )
 
 
 @op(out=Out(dict))
 def wst_atp_reload_op(context):
     """Execute all reload operations simultaneously regardless of failure."""
-    reload_ops = [
-        (wst_atp_reload_media_op, "media"),
-        (wst_atp_reload_training_op, "training"),
-        (wst_atp_reload_prediction_op, "prediction")
-    ]
+    context.log.info("Starting reload operations via job execution")
     
-    return execute_ops_simultaneously(context, reload_ops, "reload")
+    try:
+        result = execute_in_process(reload_job)
+        
+        context.log.info(f"Reload job completed. Success: {result.success}")
+        
+        return Output(
+            value={
+                "status": "success" if result.success else "failed",
+                "run_id": result.run_id,
+                "success": result.success
+            },
+            metadata={
+                "execution_method": "job_execution",
+                "run_id": result.run_id,
+                "success": result.success
+            }
+        )
+        
+    except Exception as e:
+        context.log.error(f"Reload job execution failed: {str(e)}")
+        return Output(
+            value={"status": "failed", "error": str(e)},
+            metadata={"execution_method": "job_execution"}
+        )
 
 
 @op(out=Out(dict))
 def wst_atp_bak_drop_reload_op(context):
-    """Execute complete backup, drop, instantiate, and reload sequence using composite ops."""
-    composite_ops = [
-        (wst_atp_bak_op, "backup"),
-        (wst_atp_drop_op, "drop"),
-        (wst_atp_instantiate_op, "instantiate"),
-        (wst_atp_reload_op, "reload")
-    ]
+    """Execute complete backup, drop, instantiate, and reload sequence using job execution."""
+    context.log.info("Starting complete backup, drop, instantiate, and reload sequence via job execution")
     
-    return execute_ops_sequentially(context, composite_ops, "full_sequence")
+    try:
+        result = execute_in_process(bak_drop_reload_sequence_job)
+        
+        context.log.info(f"Full sequence job completed. Success: {result.success}")
+        
+        return Output(
+            value={
+                "status": "success" if result.success else "failed",
+                "run_id": result.run_id,
+                "success": result.success
+            },
+            metadata={
+                "execution_method": "job_execution",
+                "run_id": result.run_id,
+                "success": result.success
+            }
+        )
+        
+    except Exception as e:
+        context.log.error(f"Full sequence job execution failed: {str(e)}")
+        return Output(
+            value={"status": "failed", "error": str(e)},
+            metadata={"execution_method": "job_execution"}
+        )
