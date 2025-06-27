@@ -1,0 +1,201 @@
+{
+  "backup_table_structures": {
+    "media_backup": {
+      "table_name_pattern": "atp_media_{date}",
+      "columns": [
+        {"name": "hash", "type": "CHAR(40)"},
+        {"name": "media_type", "type": "TEXT"},
+        {"name": "media_title", "type": "VARCHAR(255)"},
+        {"name": "season", "type": "INTEGER"},
+        {"name": "episode", "type": "INTEGER"},
+        {"name": "release_year", "type": "INTEGER"},
+        {"name": "pipeline_status", "type": "TEXT"},
+        {"name": "error_status", "type": "BOOLEAN"},
+        {"name": "error_condition", "type": "TEXT"},
+        {"name": "rejection_status", "type": "TEXT"},
+        {"name": "rejection_reason", "type": "TEXT"},
+        {"name": "parent_path", "type": "TEXT"},
+        {"name": "target_path", "type": "TEXT"},
+        {"name": "original_title", "type": "TEXT"},
+        {"name": "original_path", "type": "TEXT"},
+        {"name": "original_link", "type": "TEXT"},
+        {"name": "rss_source", "type": "TEXT"},
+        {"name": "uploader", "type": "VARCHAR(25)"},
+        {"name": "imdb_id", "type": "VARCHAR(10)"},
+        {"name": "tmdb_id", "type": "INTEGER"},
+        {"name": "budget", "type": "BIGINT"},
+        {"name": "revenue", "type": "BIGINT"},
+        {"name": "runtime", "type": "INTEGER"},
+        {"name": "origin_country", "type": "TEXT[]"},
+        {"name": "production_companies", "type": "TEXT[]"},
+        {"name": "production_countries", "type": "TEXT[]"},
+        {"name": "production_status", "type": "VARCHAR(25)"},
+        {"name": "original_language", "type": "CHAR(2)"},
+        {"name": "spoken_languages", "type": "TEXT[]"},
+        {"name": "genre", "type": "TEXT[]"},
+        {"name": "original_media_title", "type": "VARCHAR(255)"},
+        {"name": "tagline", "type": "VARCHAR(255)"},
+        {"name": "overview", "type": "TEXT"},
+        {"name": "tmdb_rating", "type": "DECIMAL(5,3)"},
+        {"name": "tmdb_votes", "type": "INTEGER"},
+        {"name": "rt_score", "type": "INTEGER"},
+        {"name": "metascore", "type": "INTEGER"},
+        {"name": "imdb_rating", "type": "DECIMAL(4,1)"},
+        {"name": "imdb_votes", "type": "INTEGER"},
+        {"name": "resolution", "type": "VARCHAR(10)"},
+        {"name": "video_codec", "type": "VARCHAR(10)"},
+        {"name": "upload_type", "type": "VARCHAR(10)"},
+        {"name": "audio_codec", "type": "VARCHAR(10)"},
+        {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE"},
+        {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE"}
+      ]
+    },
+    "training_backup": {
+      "table_name_pattern": "atp_training_{date}",
+      "columns": [
+        {"name": "hash", "type": "CHAR(40)"},
+        {"name": "training_data", "type": "TEXT"},
+        {"name": "model_version", "type": "VARCHAR(50)"},
+        {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE"},
+        {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE"}
+      ]
+    },
+    "prediction_backup": {
+      "table_name_pattern": "atp_prediction_{date}",
+      "columns": [
+        {"name": "hash", "type": "CHAR(40)"},
+        {"name": "prediction_score", "type": "DECIMAL(5,3)"},
+        {"name": "confidence", "type": "DECIMAL(5,3)"},
+        {"name": "model_version", "type": "VARCHAR(50)"},
+        {"name": "created_at", "type": "TIMESTAMP WITH TIME ZONE"},
+        {"name": "updated_at", "type": "TIMESTAMP WITH TIME ZONE"}
+      ]
+    }
+  },
+  "column_mapping_structures": {
+    "media_column_mapping": {
+      "table_name_pattern": "atp_media_{date}_column_mapping",
+      "columns": [
+        {"name": "source_column_name", "type": "TEXT"},
+        {"name": "bak_column_name", "type": "TEXT"},
+        {"name": "source_pgsql_data_type", "type": "TEXT"},
+        {"name": "bak_pgsql_data_type", "type": "TEXT"},
+        {"name": "enum_name", "type": "TEXT"}
+      ],
+      "default_mappings": [
+        {"source_column_name": "hash", "bak_column_name": "hash", "source_pgsql_data_type": "character", "bak_pgsql_data_type": "character", "enum_name": null},
+        {"source_column_name": "media_type", "bak_column_name": "media_type", "source_pgsql_data_type": "media_type", "bak_pgsql_data_type": "text", "enum_name": "media_type"},
+        {"source_column_name": "media_title", "bak_column_name": "media_title", "source_pgsql_data_type": "character varying", "bak_pgsql_data_type": "character varying", "enum_name": null},
+        {"source_column_name": "season", "bak_column_name": "season", "source_pgsql_data_type": "integer", "bak_pgsql_data_type": "integer", "enum_name": null},
+        {"source_column_name": "episode", "bak_column_name": "episode", "source_pgsql_data_type": "integer", "bak_pgsql_data_type": "integer", "enum_name": null},
+        {"source_column_name": "release_year", "bak_column_name": "release_year", "source_pgsql_data_type": "integer", "bak_pgsql_data_type": "integer", "enum_name": null},
+        {"source_column_name": "pipeline_status", "bak_column_name": "pipeline_status", "source_pgsql_data_type": "pipeline_status", "bak_pgsql_data_type": "text", "enum_name": "pipeline_status"},
+        {"source_column_name": "error_status", "bak_column_name": "error_status", "source_pgsql_data_type": "boolean", "bak_pgsql_data_type": "boolean", "enum_name": null},
+        {"source_column_name": "rejection_status", "bak_column_name": "rejection_status", "source_pgsql_data_type": "rejection_status", "bak_pgsql_data_type": "text", "enum_name": "rejection_status"},
+        {"source_column_name": "rss_source", "bak_column_name": "rss_source", "source_pgsql_data_type": "rss_source", "bak_pgsql_data_type": "text", "enum_name": "rss_source"},
+        {"source_column_name": "original_title", "bak_column_name": "original_title", "source_pgsql_data_type": "text", "bak_pgsql_data_type": "text", "enum_name": null}
+      ]
+    },
+    "training_column_mapping": {
+      "table_name_pattern": "atp_training_{date}_column_mapping",
+      "columns": [
+        {"name": "source_column_name", "type": "TEXT"},
+        {"name": "bak_column_name", "type": "TEXT"},
+        {"name": "source_pgsql_data_type", "type": "TEXT"},
+        {"name": "bak_pgsql_data_type", "type": "TEXT"},
+        {"name": "enum_name", "type": "TEXT"}
+      ],
+      "default_mappings": [
+        {"source_column_name": "hash", "bak_column_name": "hash", "source_pgsql_data_type": "character", "bak_pgsql_data_type": "character", "enum_name": null},
+        {"source_column_name": "training_data", "bak_column_name": "training_data", "source_pgsql_data_type": "jsonb", "bak_pgsql_data_type": "text", "enum_name": null},
+        {"source_column_name": "model_version", "bak_column_name": "model_version", "source_pgsql_data_type": "character varying", "bak_pgsql_data_type": "character varying", "enum_name": null}
+      ]
+    },
+    "prediction_column_mapping": {
+      "table_name_pattern": "atp_prediction_{date}_column_mapping",
+      "columns": [
+        {"name": "source_column_name", "type": "TEXT"},
+        {"name": "bak_column_name", "type": "TEXT"},
+        {"name": "source_pgsql_data_type", "type": "TEXT"},
+        {"name": "bak_pgsql_data_type", "type": "TEXT"},
+        {"name": "enum_name", "type": "TEXT"}
+      ],
+      "default_mappings": [
+        {"source_column_name": "hash", "bak_column_name": "hash", "source_pgsql_data_type": "character", "bak_pgsql_data_type": "character", "enum_name": null},
+        {"source_column_name": "prediction_score", "bak_column_name": "prediction_score", "source_pgsql_data_type": "numeric", "bak_pgsql_data_type": "numeric", "enum_name": null},
+        {"source_column_name": "confidence", "bak_column_name": "confidence", "source_pgsql_data_type": "numeric", "bak_pgsql_data_type": "numeric", "enum_name": null},
+        {"source_column_name": "model_version", "bak_column_name": "model_version", "source_pgsql_data_type": "character varying", "bak_pgsql_data_type": "character varying", "enum_name": null}
+      ]
+    }
+  },
+  "backup_sample_data": {
+    "media_backup_data": [
+      {
+        "hash": "test123456789012345678901234567890123456",
+        "media_type": "movie",
+        "media_title": "Test Movie",
+        "season": null,
+        "episode": null,
+        "release_year": 2024,
+        "pipeline_status": "complete",
+        "error_status": false,
+        "error_condition": null,
+        "rejection_status": "accepted",
+        "rejection_reason": null,
+        "parent_path": "/media/movies",
+        "target_path": "/media/movies/Test Movie (2024)",
+        "original_title": "Test.Movie.2024",
+        "original_path": "/cache/Test.Movie.2024.1080p.BluRay.x264",
+        "original_link": "https://test.com/download/test123456789012345678901234567890123456",
+        "rss_source": "yts.mx",
+        "uploader": "TestUploader",
+        "imdb_id": "tt1234567",
+        "tmdb_id": 12345,
+        "budget": 10000000,
+        "revenue": 25000000,
+        "runtime": 120,
+        "origin_country": ["US"],
+        "production_companies": ["Test Studios"],
+        "production_countries": ["US"],
+        "production_status": "Released",
+        "original_language": "en",
+        "spoken_languages": ["en"],
+        "genre": ["Action", "Adventure"],
+        "original_media_title": "Test Movie",
+        "tagline": "A test movie for testing",
+        "overview": "This is a test movie used for testing backup and reload functionality.",
+        "tmdb_rating": 7.5,
+        "tmdb_votes": 1500,
+        "rt_score": 85,
+        "metascore": 75,
+        "imdb_rating": 7.3,
+        "imdb_votes": 8500,
+        "resolution": "1080p",
+        "video_codec": "x264",
+        "upload_type": "BluRay",
+        "audio_codec": "DTS",
+        "created_at": "2024-01-15 10:30:00+00",
+        "updated_at": "2024-01-15 10:30:00+00"
+      }
+    ],
+    "training_backup_data": [
+      {
+        "hash": "test123456789012345678901234567890123456",
+        "training_data": "{\"features\": [\"genre\", \"runtime\"], \"target\": \"success\"}",
+        "model_version": "v1.0.0",
+        "created_at": "2024-01-15 10:30:00+00",
+        "updated_at": "2024-01-15 10:30:00+00"
+      }
+    ],
+    "prediction_backup_data": [
+      {
+        "hash": "test123456789012345678901234567890123456",
+        "prediction_score": 0.85,
+        "confidence": 0.92,
+        "model_version": "v1.0.0",
+        "created_at": "2024-01-15 10:30:00+00",
+        "updated_at": "2024-01-15 10:30:00+00"
+      }
+    ]
+  }
+}

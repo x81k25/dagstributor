@@ -29,6 +29,12 @@ class FixtureLoader:
         with open(data_file, 'r') as f:
             return json.load(f)
     
+    def load_backup_fixtures(self) -> Dict[str, Any]:
+        """Load backup fixtures from backup_fixtures.json."""
+        backup_file = self.fixtures_dir / "backup_fixtures.json"
+        with open(backup_file, 'r') as f:
+            return json.load(f)
+    
     def get_table_schema(self, schema_name: str, table_name: str) -> Dict[str, Any]:
         """Get schema definition for a specific table."""
         schemas = self.load_schemas()
@@ -264,6 +270,116 @@ class DatabaseFixture:
             """, (schema_name,))
             result = cursor.fetchone()
             return result['exists'] if isinstance(result, dict) else result[0]
+        finally:
+            cursor.close()
+            conn.close()
+    
+    def create_backup_environment(self, table_type: str, date_str: Optional[str] = None) -> Dict[str, str]:
+        """Create backup tables and column mappings for testing reload operations."""
+        from datetime import date
+        
+        if date_str is None:
+            date_str = date.today().strftime('%Y%m%d')
+        
+        backup_fixtures = self.loader.load_backup_fixtures()
+        
+        # Get backup table structure
+        backup_key = f"{table_type}_backup"
+        if backup_key not in backup_fixtures["backup_table_structures"]:
+            raise ValueError(f"Unknown table type: {table_type}")
+        
+        backup_structure = backup_fixtures["backup_table_structures"][backup_key]
+        mapping_structure = backup_fixtures["column_mapping_structures"][f"{table_type}_column_mapping"]
+        
+        # Generate table names
+        backup_table_name = backup_structure["table_name_pattern"].format(date=date_str)
+        mapping_table_name = mapping_structure["table_name_pattern"].format(date=date_str)
+        
+        conn = self.get_connection()
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        try:
+            # Ensure bak schema exists
+            cursor.execute("CREATE SCHEMA IF NOT EXISTS bak;")
+            
+            # Create backup table
+            backup_columns = []
+            for col in backup_structure["columns"]:
+                backup_columns.append(f"{col['name']} {col['type']}")
+            
+            backup_sql = f"""
+                CREATE TABLE IF NOT EXISTS bak.{backup_table_name} (
+                    {', '.join(backup_columns)}
+                );
+            """
+            cursor.execute(backup_sql)
+            
+            # Create column mapping table  
+            mapping_columns = []
+            for col in mapping_structure["columns"]:
+                mapping_columns.append(f"{col['name']} {col['type']}")
+            
+            mapping_sql = f"""
+                CREATE TABLE IF NOT EXISTS bak.{mapping_table_name} (
+                    {', '.join(mapping_columns)}
+                );
+            """
+            cursor.execute(mapping_sql)
+            
+            # Insert default column mappings
+            for mapping in mapping_structure["default_mappings"]:
+                placeholders = ", ".join(["%s"] * len(mapping))
+                columns = ", ".join(mapping.keys())
+                values = list(mapping.values())
+                
+                cursor.execute(f"""
+                    INSERT INTO bak.{mapping_table_name} ({columns})
+                    VALUES ({placeholders})
+                    ON CONFLICT DO NOTHING;
+                """, values)
+            
+            # Insert sample backup data if available
+            data_key = f"{table_type}_backup_data"
+            if data_key in backup_fixtures["backup_sample_data"]:
+                sample_data = backup_fixtures["backup_sample_data"][data_key]
+                
+                for record in sample_data:
+                    columns = list(record.keys())
+                    placeholders = ", ".join(["%s"] * len(columns))
+                    column_names = ", ".join(columns)
+                    values = list(record.values())
+                    
+                    cursor.execute(f"""
+                        INSERT INTO bak.{backup_table_name} ({column_names})
+                        VALUES ({placeholders})
+                        ON CONFLICT DO NOTHING;
+                    """, values)
+            
+            return {
+                "backup_table": backup_table_name,
+                "mapping_table": mapping_table_name,
+                "schema": "bak"
+            }
+            
+        finally:
+            cursor.close()
+            conn.close()
+    
+    def cleanup_backup_environment(self, table_info: Dict[str, str]) -> None:
+        """Clean up backup tables created for testing."""
+        conn = self.get_connection()
+        conn.autocommit = True
+        cursor = conn.cursor()
+        
+        try:
+            schema = table_info["schema"]
+            backup_table = table_info["backup_table"]
+            mapping_table = table_info["mapping_table"]
+            
+            cursor.execute(f"DROP TABLE IF EXISTS {schema}.{backup_table};")
+            cursor.execute(f"DROP TABLE IF EXISTS {schema}.{mapping_table};")
+            
         finally:
             cursor.close()
             conn.close()
