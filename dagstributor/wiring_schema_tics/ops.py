@@ -4,6 +4,7 @@ import psycopg2
 import psycopg2.extras
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def execute_sql_file(context, sql_filename):
@@ -122,444 +123,240 @@ def execute_sql_file(context, sql_filename):
         conn.close()
 
 
-@op(out=Out(dict))
-def test_db_connection_op(context):
-    """Test database connection by executing SQL from test.sql file using enhanced psycopg2."""
-    sql_filename = "test.sql"
-    
-    try:
-        result = execute_sql_file(context, sql_filename)
-        
-        context.log.info(f"Executed {result['statements_executed']} statements, {result['total_rows']} total rows")
-        
-        # Create preview of results if any
-        preview = ""
-        if result['results']:
-            preview = str(result['results'][:3])  # First 3 rows
-            if len(result['results']) > 3:
-                preview += f"... and {len(result['results']) - 3} more rows"
-        
-        return Output(
-            value={
-                "status": "success", 
-                "statements_executed": result['statements_executed'],
-                "total_rows": result['total_rows'],
-                "sql_file": sql_filename,
-                "results_preview": preview
-            },
-            metadata={
-                "statements_executed": result['statements_executed'],
-                "total_rows": result['total_rows'],
-                "sql_file": sql_filename,
-                "execution_method": "enhanced_psycopg2"
-            }
-        )
-        
-    except Exception as e:
-        context.log.error(f"Failed to execute {sql_filename}: {str(e)}")
-        return Output(
-            value={"status": "failed", "error": str(e), "sql_file": sql_filename},
-            metadata={"sql_file": sql_filename, "execution_method": "enhanced_psycopg2"}
-        )
-
-
-@op(out=Out(dict))
-def wst_atp_drop_op(context):
-    """Drop the atp schema and all its objects. WARNING: This will delete all data!"""
-    sql_filename = "ddl/00_drop_schema.sql"
-    
-    context.log.warning("⚠️  WARNING: This operation will DROP the atp schema and DELETE all data!")
-    
-    try:
-        result = execute_sql_file(context, sql_filename)
-        
-        context.log.info(f"Successfully dropped schema. Executed {result['statements_executed']} statements")
-        
-        return Output(
-            value={
-                "status": "success",
-                "statements_executed": result['statements_executed'],
-                "sql_file": sql_filename,
-                "message": "Schema 'atp' dropped successfully (if it existed)"
-            },
-            metadata={
-                "statements_executed": result['statements_executed'],
-                "sql_file": sql_filename,
-                "execution_method": "enhanced_psycopg2"
-            }
-        )
-        
-    except Exception as e:
-        context.log.error(f"Failed to execute {sql_filename}: {str(e)}")
-        return Output(
-            value={"status": "failed", "error": str(e), "sql_file": sql_filename},
-            metadata={"sql_file": sql_filename, "execution_method": "enhanced_psycopg2"}
-        )
-
-
-@op(out=Out(dict))
-def wst_atp_instantiate_op(context):
-    """Execute DDL scripts to instantiate the atp schema in order."""
-    ddl_scripts = [
-        "ddl/01_instantiate_media.sql",
-        "ddl/02_instantiate_training.sql", 
-        "ddl/03_instantiate_prediction.sql",
-        "ddl/10_set_perms.sql"
-    ]
-    
-    results = []
-    total_statements = 0
-    total_rows = 0
-    
-    context.log.info("Starting schema instantiation with scripts: " + ", ".join(ddl_scripts))
-    
-    for script in ddl_scripts:
+def create_single_script_op(sql_filename, op_description):
+    """Factory function to create a single-script SQL operation."""
+    @op(out=Out(dict))
+    def sql_op(context):
         try:
-            context.log.info(f"Executing DDL script: {script}")
-            result = execute_sql_file(context, script)
+            result = execute_sql_file(context, sql_filename)
             
-            results.append({
-                "script": script,
-                "status": "success",
-                "statements_executed": result['statements_executed'],
-                "total_rows": result['total_rows']
-            })
+            context.log.info(f"{op_description} completed. Executed {result['statements_executed']} statements, {result['total_rows']} rows")
             
-            total_statements += result['statements_executed']
-            total_rows += result['total_rows']
-            
-            context.log.info(f"Successfully executed {script}")
-            
-        except Exception as e:
-            context.log.error(f"Failed to execute {script}: {str(e)}")
-            results.append({
-                "script": script,
-                "status": "failed",
-                "error": str(e)
-            })
-            
-            # Stop execution on failure
-            context.log.error("Stopping schema instantiation due to script failure")
             return Output(
                 value={
-                    "status": "failed",
-                    "failed_script": script,
-                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
-                    "total_scripts": len(ddl_scripts),
-                    "error": str(e),
-                    "results": results
+                    "status": "success",
+                    "statements_executed": result['statements_executed'],
+                    "total_rows": result['total_rows'],
+                    "sql_file": sql_filename
                 },
                 metadata={
-                    "failed_script": script,
-                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
-                    "total_scripts": len(ddl_scripts)
+                    "statements_executed": result['statements_executed'],
+                    "total_rows": result['total_rows'],
+                    "sql_file": sql_filename,
+                    "execution_method": "enhanced_psycopg2"
                 }
             )
-    
-    context.log.info(f"Schema instantiation completed successfully. Total: {total_statements} statements")
-    
-    return Output(
-        value={
-            "status": "success",
-            "scripts_executed": len(results),
-            "total_scripts": len(ddl_scripts),
-            "total_statements": total_statements,
-            "total_rows": total_rows,
-            "results": results
-        },
-        metadata={
-            "total_statements": total_statements,
-            "total_rows": total_rows,
-            "scripts_executed": len(results)
-        }
-    )
-
-
-@op(out=Out(dict))
-def wst_atp_reload_op(context):
-    """Execute reload scripts to restore data from backup."""
-    reload_scripts = [
-        "bak/reload_media.sql",
-        "bak/reload_training.sql",
-        "bak/reload_prediction.sql"
-    ]
-    
-    results = []
-    total_statements = 0
-    total_rows = 0
-    
-    context.log.info("Starting data reload with scripts: " + ", ".join(reload_scripts))
-    
-    for script in reload_scripts:
-        try:
-            context.log.info(f"Executing reload script: {script}")
-            result = execute_sql_file(context, script)
-            
-            results.append({
-                "script": script,
-                "status": "success",
-                "statements_executed": result['statements_executed'],
-                "total_rows": result['total_rows']
-            })
-            
-            total_statements += result['statements_executed']
-            total_rows += result['total_rows']
-            
-            context.log.info(f"Successfully executed {script}")
             
         except Exception as e:
-            context.log.error(f"Failed to execute {script}: {str(e)}")
-            results.append({
-                "script": script,
-                "status": "failed",
-                "error": str(e)
-            })
-            
-            # Stop execution on failure
-            context.log.error("Stopping data reload due to script failure")
+            context.log.error(f"Failed to execute {sql_filename}: {str(e)}")
             return Output(
-                value={
-                    "status": "failed",
-                    "failed_script": script,
-                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
-                    "total_scripts": len(reload_scripts),
-                    "error": str(e),
-                    "results": results
-                },
-                metadata={
-                    "failed_script": script,
-                    "scripts_executed": len([r for r in results if r['status'] == 'success']),
-                    "total_scripts": len(reload_scripts)
-                }
+                value={"status": "failed", "error": str(e), "sql_file": sql_filename},
+                metadata={"sql_file": sql_filename, "execution_method": "enhanced_psycopg2"}
             )
     
-    context.log.info(f"Data reload completed successfully. Total: {total_statements} statements, {total_rows} rows")
-    
-    return Output(
-        value={
-            "status": "success",
-            "scripts_executed": len(results),
-            "total_scripts": len(reload_scripts),
-            "total_statements": total_statements,
-            "total_rows": total_rows,
-            "results": results
-        },
-        metadata={
-            "total_statements": total_statements,
-            "total_rows": total_rows,
-            "scripts_executed": len(results)
-        }
-    )
+    return sql_op
 
 
-@op(out=Out(dict))
-def wst_atp_bak_drop_reload_op(context):
-    """Execute complete backup, drop, instantiate, and reload sequence."""
-    bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
-    ddl_scripts = [
-        "ddl/00_drop_schema.sql",
-        "ddl/01_instantiate_media.sql",
-        "ddl/02_instantiate_training.sql", 
-        "ddl/03_instantiate_prediction.sql",
-        "ddl/10_set_perms.sql"
-    ]
-    reload_scripts = [
-        "bak/reload_media.sql",
-        "bak/reload_training.sql",
-        "bak/reload_prediction.sql"
-    ]
-    
+def execute_ops_simultaneously(context, ops_list, operation_type):
+    """Execute multiple ops simultaneously regardless of failure."""
     results = []
-    total_statements = 0
-    total_rows = 0
+    context.log.info(f"Starting simultaneous {operation_type} operations")
     
-    context.log.info("Starting complete backup, drop, instantiate, and reload sequence")
-    
-    try:
-        # Step 1: Backup
-        context.log.info("Step 1/4: Executing backup scripts")
-        for script in bak_scripts:
-            try:
-                context.log.info(f"Executing backup script: {script}")
-                result = execute_sql_file(context, f"bak/{script}")
-                
-                results.append({
-                    "step": "backup",
-                    "script": script,
-                    "status": "success",
-                    "statements_executed": result['statements_executed'],
-                    "total_rows": result['total_rows']
-                })
-                
-                total_statements += result['statements_executed']
-                total_rows += result['total_rows']
-                
-            except Exception as e:
-                context.log.error(f"Failed to execute backup script {script}: {str(e)}")
-                return Output(
-                    value={
-                        "status": "failed",
-                        "failed_step": "backup",
-                        "failed_script": script,
-                        "error": str(e),
-                        "results": results
-                    },
-                    metadata={
-                        "failed_step": "backup",
-                        "failed_script": script
-                    }
-                )
-        
-        context.log.info("Step 1/4: Backup completed successfully")
-        
-        # Step 2-4: Drop, instantiate, and reload (DDL + reload scripts)
-        context.log.info("Step 2/4: Executing drop and instantiate scripts")
-        for script in ddl_scripts:
-            try:
-                context.log.info(f"Executing DDL script: {script}")
-                result = execute_sql_file(context, script)
-                
-                step_name = "drop" if "drop" in script else "instantiate"
-                results.append({
-                    "step": step_name,
-                    "script": script,
-                    "status": "success",
-                    "statements_executed": result['statements_executed'],
-                    "total_rows": result['total_rows']
-                })
-                
-                total_statements += result['statements_executed']
-                total_rows += result['total_rows']
-                
-            except Exception as e:
-                context.log.error(f"Failed to execute DDL script {script}: {str(e)}")
-                return Output(
-                    value={
-                        "status": "failed",
-                        "failed_step": step_name,
-                        "failed_script": script,
-                        "error": str(e),
-                        "results": results
-                    },
-                    metadata={
-                        "failed_step": step_name,
-                        "failed_script": script
-                    }
-                )
-        
-        context.log.info("Step 2-3/4: Drop and instantiate completed successfully")
-        
-        # Step 4: Reload data
-        context.log.info("Step 4/4: Executing reload scripts")
-        for script in reload_scripts:
-            try:
-                context.log.info(f"Executing reload script: {script}")
-                result = execute_sql_file(context, script)
-                
-                results.append({
-                    "step": "reload",
-                    "script": script,
-                    "status": "success",
-                    "statements_executed": result['statements_executed'],
-                    "total_rows": result['total_rows']
-                })
-                
-                total_statements += result['statements_executed']
-                total_rows += result['total_rows']
-                
-            except Exception as e:
-                context.log.error(f"Failed to execute reload script {script}: {str(e)}")
-                return Output(
-                    value={
-                        "status": "failed",
-                        "failed_step": "reload",
-                        "failed_script": script,
-                        "error": str(e),
-                        "results": results
-                    },
-                    metadata={
-                        "failed_step": "reload",
-                        "failed_script": script
-                    }
-                )
-        
-        context.log.info("Step 4/4: Data reload completed successfully")
-        context.log.info("🎉 Complete backup, drop, instantiate, and reload sequence completed successfully!")
-        
-        return Output(
-            value={
-                "status": "success",
-                "message": "Complete backup, drop, instantiate, and reload sequence completed successfully",
-                "total_statements": total_statements,
-                "total_rows": total_rows,
-                "results": results
-            },
-            metadata={
-                "total_statements": total_statements,
-                "total_rows": total_rows,
-                "scripts_executed": len(results)
-            }
-        )
-        
-    except Exception as e:
-        context.log.error(f"Unexpected error in sequence: {str(e)}")
-        return Output(
-            value={
-                "status": "failed",
-                "error": str(e),
-                "results": results
-            },
-            metadata={
-                "sequence_completed": False
-            }
-        )
-
-
-@op(out=Out(dict))
-def wst_atp_bak_op(context):
-    """Execute all backup ATP scripts from sql/bak directory."""
-    bak_scripts = ["bak_media.sql", "bak_prediction.sql", "bak_training.sql"]
-    results = []
-    total_statements = 0
-    total_rows = 0
-    
-    for script in bak_scripts:
+    def execute_op(op_func, op_name):
+        """Execute individual op in thread."""
         try:
-            context.log.info(f"Executing backup script: {script}")
-            result = execute_sql_file(context, f"bak/{script}")
+            # Create a mock context for the individual op
+            mock_context = type('MockContext', (), {
+                'log': context.log,
+                'run_id': context.run_id if hasattr(context, 'run_id') else 'mock_run'
+            })()
             
-            results.append({
-                "script": script,
+            result = op_func(mock_context)
+            return {
+                "op_name": op_name,
                 "status": "success",
-                "statements_executed": result['statements_executed'],
-                "total_rows": result['total_rows']
-            })
-            
-            total_statements += result['statements_executed']
-            total_rows += result['total_rows']
-            
+                "result": result.value
+            }
         except Exception as e:
-            context.log.error(f"Failed to execute {script}: {str(e)}")
-            results.append({
-                "script": script,
-                "status": "failed", 
+            context.log.error(f"{operation_type.capitalize()} operation {op_name} failed: {str(e)}")
+            return {
+                "op_name": op_name,
+                "status": "failed",
                 "error": str(e)
-            })
+            }
     
-    context.log.info(f"Completed backup ATP execution. Total: {total_statements} statements, {total_rows} rows")
+    with ThreadPoolExecutor(max_workers=len(ops_list)) as executor:
+        future_to_op = {executor.submit(execute_op, op_func, op_name): op_name 
+                       for op_func, op_name in ops_list}
+        
+        for future in as_completed(future_to_op):
+            op_name = future_to_op[future]
+            try:
+                result = future.result()
+                results.append(result)
+                context.log.info(f"{operation_type.capitalize()} operation {op_name} completed with status: {result['status']}")
+            except Exception as e:
+                context.log.error(f"{operation_type.capitalize()} operation {op_name} failed with exception: {str(e)}")
+                results.append({
+                    "op_name": op_name,
+                    "status": "failed",
+                    "error": str(e)
+                })
+    
+    successful_ops = [r for r in results if r['status'] == 'success']
+    failed_ops = [r for r in results if r['status'] == 'failed']
+    
+    context.log.info(f"{operation_type.capitalize()} operations completed. Success: {len(successful_ops)}, Failed: {len(failed_ops)}")
     
     return Output(
         value={
             "status": "completed",
-            "scripts_executed": len([r for r in results if r['status'] == 'success']),
-            "total_scripts": len(bak_scripts),
-            "total_statements": total_statements,
-            "total_rows": total_rows,
+            "successful_operations": len(successful_ops),
+            "failed_operations": len(failed_ops),
+            "total_operations": len(ops_list),
             "results": results
         },
         metadata={
-            "total_statements": total_statements,
-            "total_rows": total_rows,
-            "execution_method": "enhanced_psycopg2"
+            "execution_method": "simultaneous_composite",
+            "successful_operations": len(successful_ops),
+            "failed_operations": len(failed_ops)
         }
     )
+
+
+def execute_ops_sequentially(context, ops_list, operation_type):
+    """Execute multiple ops sequentially, stop on first failure."""
+    results = []
+    context.log.info(f"Starting sequential {operation_type} operations")
+    
+    for op_func, op_name in ops_list:
+        try:
+            context.log.info(f"Executing {operation_type} operation: {op_name}")
+            
+            # Create a mock context for the individual op
+            mock_context = type('MockContext', (), {
+                'log': context.log,
+                'run_id': context.run_id if hasattr(context, 'run_id') else 'mock_run'
+            })()
+            
+            result = op_func(mock_context)
+            
+            results.append({
+                "op_name": op_name,
+                "status": "success",
+                "result": result.value
+            })
+            
+            context.log.info(f"{operation_type.capitalize()} operation {op_name} completed successfully")
+            
+        except Exception as e:
+            context.log.error(f"{operation_type.capitalize()} operation {op_name} failed: {str(e)}")
+            results.append({
+                "op_name": op_name,
+                "status": "failed",
+                "error": str(e)
+            })
+            
+            context.log.error(f"Stopping {operation_type} operations due to failure")
+            return Output(
+                value={
+                    "status": "failed",
+                    "failed_operation": op_name,
+                    "completed_operations": len([r for r in results if r['status'] == 'success']),
+                    "total_operations": len(ops_list),
+                    "error": str(e),
+                    "results": results
+                },
+                metadata={
+                    "execution_method": "sequential_composite",
+                    "failed_operation": op_name,
+                    "completed_operations": len([r for r in results if r['status'] == 'success'])
+                }
+            )
+    
+    context.log.info(f"All {operation_type} operations completed successfully. Total: {len(results)}")
+    
+    return Output(
+        value={
+            "status": "success",
+            "completed_operations": len(results),
+            "total_operations": len(ops_list),
+            "results": results
+        },
+        metadata={
+            "execution_method": "sequential_composite",
+            "completed_operations": len(results)
+        }
+    )
+
+
+# Individual script ops using factory function
+test_db_connection_op = create_single_script_op("test.sql", "Database connection test")
+wst_atp_drop_op = create_single_script_op("ddl/00_drop_schema.sql", "Schema drop")
+
+# Backup ops
+wst_atp_bak_media_op = create_single_script_op("bak/bak_media.sql", "Media backup")
+wst_atp_bak_prediction_op = create_single_script_op("bak/bak_prediction.sql", "Prediction backup")
+wst_atp_bak_training_op = create_single_script_op("bak/bak_training.sql", "Training backup")
+
+# Instantiate ops
+wst_atp_instantiate_media_op = create_single_script_op("ddl/01_instantiate_media.sql", "Media instantiation")
+wst_atp_instantiate_training_op = create_single_script_op("ddl/02_instantiate_training.sql", "Training instantiation")
+wst_atp_instantiate_prediction_op = create_single_script_op("ddl/03_instantiate_prediction.sql", "Prediction instantiation")
+wst_atp_set_perms_op = create_single_script_op("ddl/10_set_perms.sql", "Permissions setting")
+
+# Reload ops
+wst_atp_reload_media_op = create_single_script_op("bak/reload_media.sql", "Media reload")
+wst_atp_reload_training_op = create_single_script_op("bak/reload_training.sql", "Training reload")
+wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sql", "Prediction reload")
+
+
+# Composite ops - these call other ops, never scripts directly
+@op(out=Out(dict))
+def wst_atp_bak_op(context):
+    """Execute all backup operations simultaneously regardless of failure."""
+    backup_ops = [
+        (wst_atp_bak_media_op, "media"),
+        (wst_atp_bak_prediction_op, "prediction"),
+        (wst_atp_bak_training_op, "training")
+    ]
+    
+    return execute_ops_simultaneously(context, backup_ops, "backup")
+
+
+@op(out=Out(dict))
+def wst_atp_instantiate_op(context):
+    """Execute instantiate operations sequentially (excluding 00_drop_schema), stop on first failure."""
+    instantiate_ops = [
+        (wst_atp_instantiate_media_op, "media"),
+        (wst_atp_instantiate_training_op, "training"),
+        (wst_atp_instantiate_prediction_op, "prediction"),
+        (wst_atp_set_perms_op, "permissions")
+    ]
+    
+    return execute_ops_sequentially(context, instantiate_ops, "instantiate")
+
+
+@op(out=Out(dict))
+def wst_atp_reload_op(context):
+    """Execute all reload operations simultaneously regardless of failure."""
+    reload_ops = [
+        (wst_atp_reload_media_op, "media"),
+        (wst_atp_reload_training_op, "training"),
+        (wst_atp_reload_prediction_op, "prediction")
+    ]
+    
+    return execute_ops_simultaneously(context, reload_ops, "reload")
+
+
+@op(out=Out(dict))
+def wst_atp_bak_drop_reload_op(context):
+    """Execute complete backup, drop, instantiate, and reload sequence using composite ops."""
+    composite_ops = [
+        (wst_atp_bak_op, "backup"),
+        (wst_atp_drop_op, "drop"),
+        (wst_atp_instantiate_op, "instantiate"),
+        (wst_atp_reload_op, "reload")
+    ]
+    
+    return execute_ops_sequentially(context, composite_ops, "full_sequence")
