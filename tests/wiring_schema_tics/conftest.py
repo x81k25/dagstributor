@@ -12,9 +12,9 @@ from .fixtures import DatabaseFixture, FixtureLoader
 
 @pytest.fixture(scope="session")
 def env_vars():
-    """Load database connection parameters from local .env file."""
+    """Load database connection parameters from local .env file and map TEST_ to WST_ for ops."""
     env_file = Path(__file__).parent.parent.parent / ".env"
-    env_vars = {}
+    test_env_vars = {}
     
     if env_file.exists():
         with open(env_file, 'r') as f:
@@ -22,23 +22,30 @@ def env_vars():
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
-                    env_vars[key] = value
+                    test_env_vars[key] = value
     else:
         # Fallback values if .env doesn't exist
-        env_vars = {
-            'WST_PGSQL_HOST': '192.168.50.2',
-            'WST_PGSQL_PORT': '31434',
-            'WST_PGSQL_DATABASE': 'postgres',
-            'WST_PGSQL_USERNAME': 'x81-test',
-            'WST_PGSQL_PASSWORD': 'DB5jK2G7g8XZupdf6zFnWLsbTN',
+        test_env_vars = {
+            'TEST_PGSQL_HOST': '192.168.50.2',
+            'TEST_PGSQL_PORT': '31434',
+            'TEST_PGSQL_DATABASE': 'test',
+            'TEST_PGSQL_USERNAME': 'x81-test',
+            'TEST_PGSQL_PASSWORD': 'DB5jK2G7g8XZupdf6zFnWLsbTN',
         }
     
-    return env_vars
+    # Map TEST_ variables to WST_ variables for ops to use
+    wst_env_vars = {}
+    for key, value in test_env_vars.items():
+        if key.startswith('TEST_PGSQL_'):
+            wst_key = key.replace('TEST_PGSQL_', 'WST_PGSQL_')
+            wst_env_vars[wst_key] = value
+    
+    return wst_env_vars
 
 
-@pytest.fixture
-def mock_env(env_vars):
-    """Mock environment variables for database connection."""
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_env(env_vars):
+    """Set up test environment variables automatically for all tests."""
     with patch.dict(os.environ, env_vars):
         yield env_vars
 

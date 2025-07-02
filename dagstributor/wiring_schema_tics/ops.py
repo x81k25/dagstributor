@@ -172,11 +172,15 @@ wst_atp_bak_training_op = create_single_script_op("bak/bak_training.sql", "Train
 wst_atp_instantiate_media_op = create_single_script_op("ddl/01_instantiate_media.sql", "Media instantiation")
 wst_atp_instantiate_training_op = create_single_script_op("ddl/02_instantiate_training.sql", "Training instantiation")
 wst_atp_instantiate_prediction_op = create_single_script_op("ddl/03_instantiate_prediction.sql", "Prediction instantiation")
+wst_atp_instantiate_test_op = create_single_script_op("ddl/04_instantiate_test.sql", "Test schema instantiation")
 wst_atp_set_perms_op = create_single_script_op("ddl/10_set_perms.sql", "Permissions setting")
 
 # Reload ops
 wst_atp_reload_media_op = create_single_script_op("bak/reload_media.sql", "Media reload")
 wst_atp_reload_training_op = create_single_script_op("bak/reload_training.sql", "Training reload")
 wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sql", "Prediction reload")
+
+# Sync ops
+wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_training.sql", "Media to training sync")
 
 

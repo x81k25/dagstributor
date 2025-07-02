@@ -14,7 +14,9 @@ from .ops import (
     # Reload ops
     wst_atp_reload_media_op,
     wst_atp_reload_training_op,
-    wst_atp_reload_prediction_op
+    wst_atp_reload_prediction_op,
+    # Sync ops
+    wst_atp_sync_media_to_training_op
 )
 
 
@@ -76,3 +78,9 @@ def wst_atp_bak_drop_reload_job():
     wst_atp_reload_media_op()
     wst_atp_reload_training_op()
     wst_atp_reload_prediction_op()
+
+
+@job(description="Sync media data to training table based on rejection status")
+def wst_atp_sync_media_to_training_job():
+    """Job to sync media records to training table, setting labels based on rejection status."""
+    wst_atp_sync_media_to_training_op()
