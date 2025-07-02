@@ -56,3 +56,8 @@ schedules:
     enabled: true
     cron_schedule: "57 4 * * 0"  # weekly on Sunday at 04:57
     default_status: "RUNNING"
+    
+  wst_atp_sync_media_to_training:
+    enabled: true
+    cron_schedule: "0 23 * * *"  # daily at 23:00 UTC (17:00 CT)
+    default_status: "RUNNING"
