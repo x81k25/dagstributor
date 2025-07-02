@@ -40,6 +40,7 @@ from .automatic_transmission.schedules import (
 )
 from .wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
+    wst_atp_sync_media_to_training_schedule,
 )
 
 # All assets have been removed
@@ -88,6 +89,7 @@ at_schedules = [
 # Define wiring schema-tics schedules
 wst_schedules = [
     wst_atp_bak_schedule,
+    wst_atp_sync_media_to_training_schedule,
 ]
 
 # Configure resources
