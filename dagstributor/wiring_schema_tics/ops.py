@@ -183,6 +183,9 @@ wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sq
 # Sync ops
 wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_training.sql", "Media to training sync")
 
+# Test ops
+test_schmest_op = create_single_script_op("test.sql", "Test schmest arbitrary operation")
+
 
 
 
