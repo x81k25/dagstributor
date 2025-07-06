@@ -184,58 +184,5 @@ wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sq
 wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_training.sql", "Media to training sync")
 
 
-@op(out=Out(dict), name="test_test_op")
-def test_test_op(context):
-    """Test op that performs an arbitrary operation - returns current timestamp and database info."""
-    try:
-        # Create database connection
-        conn = psycopg2.connect(
-            host=os.getenv('WST_PGSQL_HOST'),
-            port=int(os.getenv('WST_PGSQL_PORT')),
-            database=os.getenv('WST_PGSQL_DATABASE'),
-            user=os.getenv('WST_PGSQL_USERNAME'),
-            password=os.getenv('WST_PGSQL_PASSWORD'),
-            cursor_factory=psycopg2.extras.RealDictCursor
-        )
-        
-        cursor = conn.cursor()
-        
-        # Perform arbitrary operations
-        cursor.execute("SELECT NOW() as current_time, current_database() as db_name, current_user as user_name")
-        result = cursor.fetchone()
-        
-        cursor.execute("SELECT COUNT(*) as total_schemas FROM information_schema.schemata")
-        schema_count = cursor.fetchone()
-        
-        cursor.close()
-        conn.close()
-        
-        context.log.info(f"Test operation completed successfully")
-        context.log.info(f"Current time: {result['current_time']}")
-        context.log.info(f"Database: {result['db_name']}")
-        context.log.info(f"User: {result['user_name']}")
-        context.log.info(f"Total schemas: {schema_count['total_schemas']}")
-        
-        return Output(
-            value={
-                "status": "success",
-                "current_time": str(result['current_time']),
-                "database": result['db_name'],
-                "user": result['user_name'],
-                "total_schemas": schema_count['total_schemas']
-            },
-            metadata={
-                "operation_type": "arbitrary_test",
-                "database": result['db_name'],
-                "execution_method": "direct_psycopg2"
-            }
-        )
-        
-    except Exception as e:
-        context.log.error(f"Test operation failed: {str(e)}")
-        return Output(
-            value={"status": "failed", "error": str(e)},
-            metadata={"operation_type": "arbitrary_test", "execution_method": "direct_psycopg2"}
-        )
 
 
