@@ -16,7 +16,9 @@ from .ops import (
     wst_atp_reload_training_op,
     wst_atp_reload_prediction_op,
     # Sync ops
-    wst_atp_sync_media_to_training_op
+    wst_atp_sync_media_to_training_op,
+    # Test ops
+    test_test_op
 )
 
 
@@ -84,3 +86,9 @@ def wst_atp_bak_drop_reload_job():
 def wst_atp_sync_media_to_training_job():
     """Job to sync media records to training table, setting labels based on rejection status."""
     wst_atp_sync_media_to_training_op()
+
+
+@job(description="Test arbitrary operation - returns database info and timestamp", tags={"wst": "", "test": ""})
+def test_test_job():
+    """Job to perform an arbitrary test operation with database queries."""
+    test_test_op()
