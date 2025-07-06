@@ -25,7 +25,6 @@ from .wiring_schema_tics.jobs import (
     wst_atp_reload_job,
     wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
-    testy_mctestface_job,
 )
 from .automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -71,7 +70,6 @@ wst_jobs = [
     wst_atp_reload_job,
     wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
-    testy_mctestface_job,
 ]
 
 # Define all automatic transmission schedules
