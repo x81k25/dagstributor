@@ -186,6 +186,23 @@ wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_train
 # Test ops
 test_schmest_op = create_single_script_op("test_schmest.sql", "Test schmest arbitrary operation")
 
+@op(out=Out(dict), name="testy_mctestface_op")
+def testy_mctestface_op(context):
+    """Test op that does nothing for gitops testing."""
+    context.log.info("testy_mctestface_op executed - doing absolutely nothing!")
+    
+    return Output(
+        value={
+            "status": "success",
+            "message": "Did nothing successfully",
+            "purpose": "gitops testing"
+        },
+        metadata={
+            "execution_method": "do_nothing",
+            "purpose": "gitops_testing"
+        }
+    )
+
 
 
 

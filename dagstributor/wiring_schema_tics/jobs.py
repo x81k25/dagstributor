@@ -19,6 +19,7 @@ from .ops import (
     wst_atp_sync_media_to_training_op,
     # Test ops
     test_schmest_op,
+    testy_mctestface_op,
 )
 
 
@@ -92,3 +93,9 @@ def wst_atp_sync_media_to_training_job():
 def test_schmest_job():
     """Arbitrary test job for gitops testing."""
     test_schmest_op()
+
+
+@job(description="Testy McTestface - does nothing for gitops testing", tags={"wst": "", "test": ""})
+def testy_mctestface_job():
+    """Testy McTestface job that does absolutely nothing for gitops testing."""
+    testy_mctestface_op()
