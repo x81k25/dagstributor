@@ -1,10 +1,10 @@
 """Central Dagster definitions for the dagstributor project."""
 
 from dagster import Definitions, EnvVar
-from .resources import postgres_resource
+from dagstributor.resources import postgres_resource
 
 # All assets have been removed
-from .automatic_transmission.jobs import (
+from dagstributor.automatic_transmission.jobs import (
     at_01_rss_ingest_job,
     at_02_collect_job,
     at_03_parse_job,
@@ -17,7 +17,7 @@ from .automatic_transmission.jobs import (
     at_10_cleanup_job,
     at_full_pipeline_job,
 )
-from .wiring_schema_tics.jobs import (
+from dagstributor.wiring_schema_tics.jobs import (
     test_db_connection_job, 
     wst_atp_bak_job, 
     wst_atp_drop_job,
@@ -26,7 +26,7 @@ from .wiring_schema_tics.jobs import (
     wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
 )
-from .automatic_transmission.schedules import (
+from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
     at_02_collect_schedule,
     at_03_parse_schedule,
@@ -38,7 +38,7 @@ from .automatic_transmission.schedules import (
     at_09_transfer_schedule,
     at_10_cleanup_schedule,
 )
-from .wiring_schema_tics.schedules import (
+from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
 )
