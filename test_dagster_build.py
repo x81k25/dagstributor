@@ -96,7 +96,7 @@ def test_schedule_definitions():
         repo = dagstributor_repo()
         
         schedule_count = 0
-        for schedule in repo.get_all_schedules():
+        for schedule in repo.schedule_defs:
             print(f"✓ Schedule validated: {schedule.name}")
             schedule_count += 1
         
