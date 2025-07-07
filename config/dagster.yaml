@@ -11,7 +11,7 @@ run_launcher:
     load_incluster_config: true
     job_image: dagster/dagster-k8s:1.10.20
     job_spec_config:
-      activeDeadlineSeconds: 900  # 15 minutes for run launcher jobs
+      activeDeadlineSeconds: 600  # 10 minutes universal timeout for all jobs
       backoffLimit: 0
     wait_timeout: 70  # Wait 70s for K8s job completion (10s buffer over 60s op timeout)
 

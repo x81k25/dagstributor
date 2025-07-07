@@ -42,6 +42,7 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
+    sleepy_schedule,
 )
 
 # All assets have been removed
@@ -92,6 +93,7 @@ at_schedules = [
 wst_schedules = [
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
+    sleepy_schedule,
 ]
 
 # Configure resources
