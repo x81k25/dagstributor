@@ -1,6 +1,6 @@
 # Dagstributor
 
-A Dagster-based data processing and orchestration infrastructure for automated media distribution workflows.
+A Dagster-based data processing and orchestration infrastructure for automated media distribution workflows. Deployed via Docker images with GitOps automation.
 
 ## Overview
 
@@ -122,14 +122,38 @@ dagstributor/
 └── workspace.yaml               # Dagster workspace configuration
 ```
 
-## Environment Configuration
+## Deployment & Environment Configuration
 
-The system supports three environments with GitOps-based configuration:
-- **dev** - Development environment
-- **stg** - Staging environment  
-- **prod** - Production environment
+### GitOps Docker Deployment
 
-Schedule configurations are loaded based on the `ENVIRONMENT` variable and can be customized per environment through YAML files.
+The system is deployed via Docker images with automatic GitOps workflows:
+
+#### Branch-Environment Mapping
+- **dev** branch → Development environment 
+- **stg** branch → Staging environment
+- **main** branch → Production environment
+
+#### Automated Pipeline
+1. **Code Push** → Triggers GitHub Actions workflow
+2. **Docker Build** → Creates image from `dagster/dagster-k8s:1.10.20` base
+3. **Validation Tests** → Runs comprehensive Dagster component tests
+4. **Image Push** → Only if tests pass, pushes to `ghcr.io/x81k25/dagstributor`
+5. **ArgoCD Deployment** → Automatically updates Kubernetes manifests and deploys
+
+#### Image Tags
+- **Branch tag**: `ghcr.io/x81k25/dagstributor:dev|stg|main`
+- **SHA tag**: `ghcr.io/x81k25/dagstributor:sha-<7-char-commit>`
+
+#### Validation Tests
+The build pipeline validates:
+- All Python imports load correctly
+- Repository definition loads (17 jobs + 10 schedules)
+- All ops have valid configurations
+- workspace.yaml structure is correct
+
+### Environment Configuration
+
+Schedule configurations are loaded based on the `ENVIRONMENT` variable and can be customized per environment through YAML files in `config/schedules/`.
 
 ### Database Configuration
 

@@ -18,7 +18,6 @@ from .ops import (
     # Sync ops
     wst_atp_sync_media_to_training_op,
     # Test ops
-    test_schmest_op,
 )
 
 
@@ -88,7 +87,3 @@ def wst_atp_sync_media_to_training_job():
     wst_atp_sync_media_to_training_op()
 
 
-@job(description="Test schmest arbitrary operation for gitops testing", tags={"wst": "", "test": ""})
-def test_schmest_job():
-    """Arbitrary test job for gitops testing."""
-    test_schmest_op()

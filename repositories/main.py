@@ -14,6 +14,7 @@ from dagstributor.automatic_transmission.jobs import (
     at_08_download_check_job,
     at_09_transfer_job,
     at_10_cleanup_job,
+    at_full_pipeline_job,
 )
 from dagstributor.wiring_schema_tics.jobs import (
     test_db_connection_job,
@@ -52,6 +53,7 @@ def dagstributor_repo():
         at_08_download_check_job,
         at_09_transfer_job,
         at_10_cleanup_job,
+        at_full_pipeline_job,
         # Wiring schema-tics (wst) jobs
         test_db_connection_job,
         wst_atp_bak_job,
