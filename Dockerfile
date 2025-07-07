@@ -1,7 +1,7 @@
 FROM dagster/dagster-k8s:1.10.20
 
 # Install additional dependencies if needed
-RUN pip install --no-cache-dir dagster-postgres==0.21.0
+RUN pip install --no-cache-dir dagster-postgres==0.21.0 pyyaml
 
 # Copy requirements and install Python dependencies first
 COPY requirements.txt /tmp/requirements.txt

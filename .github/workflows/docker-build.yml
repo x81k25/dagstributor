@@ -41,7 +41,26 @@ jobs:
             type=ref,event=branch
             type=sha,prefix={{branch}}-,format=short
 
-      - name: Build and push Docker image
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Dagster build
+        run: |
+          echo "Testing Dagster build in Docker image..."
+          docker run --rm \
+            -e DAGSTER_HOME=/opt/dagster/app/dagstributor \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }} \
+            python /opt/dagster/app/dagstributor/test_dagster_build.py
+
+      - name: Push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
