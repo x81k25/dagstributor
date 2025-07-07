@@ -38,8 +38,8 @@ def test_repository_loading():
     """Test that the repository can be loaded"""
     print("\nTesting repository loading...")
     try:
-        from repositories.main import dagstributor_repository
-        repo = dagstributor_repository()
+        from repositories.main import dagstributor_repo
+        repo = dagstributor_repo()
         print(f"✓ Repository loaded: {repo.name}")
         return True
     except Exception as e:
@@ -50,8 +50,8 @@ def test_job_definitions():
     """Test that all jobs are properly defined"""
     print("\nTesting job definitions...")
     try:
-        from repositories.main import dagstributor_repository
-        repo = dagstributor_repository()
+        from repositories.main import dagstributor_repo
+        repo = dagstributor_repo()
         
         job_count = 0
         for job in repo.get_all_jobs():
@@ -92,8 +92,8 @@ def test_schedule_definitions():
     """Test that all schedules are properly defined"""
     print("\nTesting schedule definitions...")
     try:
-        from repositories.main import dagstributor_repository
-        repo = dagstributor_repository()
+        from repositories.main import dagstributor_repo
+        repo = dagstributor_repo()
         
         schedule_count = 0
         for schedule in repo.get_all_schedules():
@@ -128,13 +128,15 @@ def test_op_configurations():
             print(f"✓ Op configuration valid: {op.name}")
         
         from dagstributor.wiring_schema_tics.ops import (
-            test_db_connection_op, wst_atp_bak_op, wst_atp_drop_op,
-            wst_atp_instantiate_op, wst_atp_reload_op
+            test_db_connection_op, wst_atp_drop_op,
+            wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
+            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
         )
         
         wst_ops = [
-            test_db_connection_op, wst_atp_bak_op, wst_atp_drop_op,
-            wst_atp_instantiate_op, wst_atp_reload_op
+            test_db_connection_op, wst_atp_drop_op,
+            wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
+            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
         ]
         
         for op in wst_ops:
