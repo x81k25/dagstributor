@@ -8,7 +8,8 @@ import os
 from pathlib import Path
 
 # Add the dagstributor module to Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Since this script is now in tests/, we need to go up one level
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_imports():
     """Test that all modules can be imported"""
@@ -151,7 +152,7 @@ def test_workspace_yaml():
     """Test that workspace.yaml exists and is valid"""
     print("\nTesting workspace.yaml...")
     try:
-        workspace_path = Path(__file__).parent / "workspace.yaml"
+        workspace_path = Path(__file__).parent.parent / "workspace.yaml"
         if not workspace_path.exists():
             print(f"✗ workspace.yaml not found at {workspace_path}")
             return False
