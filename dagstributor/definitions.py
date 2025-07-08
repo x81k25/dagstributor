@@ -18,12 +18,12 @@ from dagstributor.automatic_transmission.jobs import (
     at_full_pipeline_job,
 )
 from dagstributor.wiring_schema_tics.jobs import (
-    test_db_connection_job, 
     wst_atp_bak_job, 
     wst_atp_reload_job,
     wst_atp_sync_media_to_training_job,
 )
-from dagstributor.test_timeout_conditions import (
+from dagstributor.test_jobs.jobs import (
+    test_db_connection_job,
     test_timeout_conditions_job,
 )
 from dagstributor.automatic_transmission.schedules import (
@@ -41,9 +41,6 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
-)
-from dagstributor.test_timeout_conditions import (
-    test_timeout_conditions_schedule,
 )
 
 # All assets have been removed
@@ -66,7 +63,6 @@ at_jobs = [
 
 # Define wiring schema-tics jobs
 wst_jobs = [
-    test_db_connection_job,
     wst_atp_bak_job,
     wst_atp_reload_job,
     wst_atp_sync_media_to_training_job,
@@ -74,6 +70,7 @@ wst_jobs = [
 
 # Define test jobs
 test_jobs = [
+    test_db_connection_job,
     test_timeout_conditions_job,
 ]
 
@@ -98,9 +95,7 @@ wst_schedules = [
 ]
 
 # Define test schedules
-test_schedules = [
-    test_timeout_conditions_schedule,
-]
+test_schedules = []
 
 # Configure resources
 resources = {
@@ -111,6 +106,6 @@ resources = {
 defs = Definitions(
     assets=all_assets,
     jobs=at_jobs + wst_jobs + test_jobs,
-    schedules=at_schedules + wst_schedules + test_schedules,
+    schedules=at_schedules + wst_schedules,
     resources=resources,
 )

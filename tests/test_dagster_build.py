@@ -27,8 +27,8 @@ def test_imports():
         from dagstributor.wiring_schema_tics import ops as wst_ops, jobs as wst_jobs, schedules as wst_schedules
         print("✓ wiring_schema_tics modules imported")
         
-        from dagstributor.test_timeout_conditions import test_timeout_conditions_job, test_timeout_conditions_schedule
-        print("✓ test_timeout_conditions module imported")
+        from dagstributor.test_jobs import ops as test_ops, jobs as test_jobs
+        print("✓ test_jobs modules imported")
         
         from repositories import main
         print("✓ repositories.main imported")
@@ -136,16 +136,14 @@ def test_op_configurations():
             print(f"✓ Op configuration valid: {op.name}")
         
         from dagstributor.wiring_schema_tics.ops import (
-            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
             wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
             wst_atp_sync_media_to_training_op
         )
         
-        from dagstributor.test_timeout_conditions import test_timeout_conditions_op
+        from dagstributor.test_jobs.ops import test_db_connection_op, test_timeout_conditions_op
         
         wst_ops = [
-            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
             wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
             wst_atp_sync_media_to_training_op

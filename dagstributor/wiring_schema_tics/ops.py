@@ -159,9 +159,6 @@ def create_single_script_op(sql_filename, op_description):
     return sql_op
 
 
-# Individual script ops using factory function
-test_db_connection_op = create_single_script_op("test.sql", "Database connection test")
-
 # Backup ops
 wst_atp_bak_media_op = create_single_script_op("bak/bak_media.sql", "Media backup")
 wst_atp_bak_prediction_op = create_single_script_op("bak/bak_prediction.sql", "Prediction backup")
