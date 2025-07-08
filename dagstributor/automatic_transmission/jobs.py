@@ -6,7 +6,7 @@ from dagster import job
 JOB_CONFIG = {
     "tags": {
         "dagster/max_runtime": "60",  # 60 seconds - informational only, not enforced
-        "at": "",
+        "service": "at",
     }
 }
 
@@ -88,7 +88,7 @@ def at_10_cleanup_job():
 FULL_PIPELINE_JOB_CONFIG = {
     "tags": {
         "dagster/max_runtime": "600",  # 10 minutes for all ops
-        "at": "",
+        "service": "at",
     }
 }
 
