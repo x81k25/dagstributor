@@ -159,9 +159,6 @@ def create_single_script_op(sql_filename, op_description):
     return sql_op
 
 
-# Individual script ops using factory function
-test_db_connection_op = create_single_script_op("test.sql", "Database connection test")
-
 # Backup ops
 wst_atp_bak_media_op = create_single_script_op("bak/bak_media.sql", "Media backup")
 wst_atp_bak_prediction_op = create_single_script_op("bak/bak_prediction.sql", "Prediction backup")
@@ -174,39 +171,3 @@ wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sq
 
 # Sync ops
 wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_training.sql", "Media to training sync")
-
-# Test ops
-@op(out=Out(dict))
-def sleepy_op(context):
-    """Test op that sleeps for 60 minutes to test timeout configurations."""
-    import time
-    
-    context.log.info("Starting sleepy op - will sleep for 60 minutes (3600 seconds)")
-    
-    try:
-        # Sleep for 60 minutes
-        time.sleep(3600)
-        
-        context.log.info("Sleepy op completed successfully after 60 minutes")
-        
-        return Output(
-            value={
-                "status": "success",
-                "sleep_duration_seconds": 3600,
-                "sleep_duration_minutes": 60
-            },
-            metadata={
-                "sleep_duration_seconds": 3600,
-                "sleep_duration_minutes": 60,
-                "test_purpose": "timeout_testing"
-            }
-        )
-        
-    except Exception as e:
-        context.log.error(f"Sleepy op failed: {str(e)}")
-        return Output(
-            value={"status": "failed", "error": str(e)},
-            metadata={"test_purpose": "timeout_testing"}
-        )
-
-

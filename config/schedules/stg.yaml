@@ -61,8 +61,3 @@ schedules:
     enabled: true
     cron_schedule: "0 9 * * 1"  # weekly on Monday at 09:00 UTC (03:00 CT)
     default_status: "RUNNING"
-    
-  sleepy:
-    enabled: true
-    cron_schedule: "57 * * * *"  # every hour at 57 minutes
-    default_status: "RUNNING"
