@@ -20,10 +20,7 @@ from dagstributor.automatic_transmission.jobs import (
 from dagstributor.wiring_schema_tics.jobs import (
     test_db_connection_job, 
     wst_atp_bak_job, 
-    wst_atp_drop_job,
-    wst_atp_instantiate_job,
     wst_atp_reload_job,
-    wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
     sleepy_job,
 )
@@ -67,10 +64,7 @@ at_jobs = [
 wst_jobs = [
     test_db_connection_job,
     wst_atp_bak_job,
-    wst_atp_drop_job,
-    wst_atp_instantiate_job,
     wst_atp_reload_job,
-    wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
     sleepy_job,
 ]
