@@ -21,7 +21,9 @@ from dagstributor.wiring_schema_tics.jobs import (
     wst_atp_bak_job,
     wst_atp_reload_job,
     wst_atp_sync_media_to_training_job,
-    sleepy_job,
+)
+from dagstributor.test_timeout_conditions import (
+    test_timeout_conditions_job,
 )
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -38,7 +40,9 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
-    sleepy_schedule,
+)
+from dagstributor.test_timeout_conditions import (
+    test_timeout_conditions_schedule,
 )
 
 
@@ -63,7 +67,8 @@ def dagstributor_repo():
         wst_atp_bak_job,
         wst_atp_reload_job,
         wst_atp_sync_media_to_training_job,
-        sleepy_job,
+        # Test jobs
+        test_timeout_conditions_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,
@@ -78,5 +83,6 @@ def dagstributor_repo():
         # Wiring schema-tics schedules
         wst_atp_bak_schedule,
         wst_atp_sync_media_to_training_schedule,
-        sleepy_schedule,
+        # Test schedules
+        test_timeout_conditions_schedule,
     ]

@@ -27,6 +27,9 @@ def test_imports():
         from dagstributor.wiring_schema_tics import ops as wst_ops, jobs as wst_jobs, schedules as wst_schedules
         print("✓ wiring_schema_tics modules imported")
         
+        from dagstributor.test_timeout_conditions import test_timeout_conditions_job, test_timeout_conditions_schedule
+        print("✓ test_timeout_conditions module imported")
+        
         from repositories import main
         print("✓ repositories.main imported")
         
@@ -72,12 +75,16 @@ def test_job_definitions():
         
         expected_wst_jobs = [
             "test_db_connection_job", "wst_atp_bak_job", "wst_atp_reload_job",
-            "wst_atp_sync_media_to_training_job", "sleepy_job"
+            "wst_atp_sync_media_to_training_job"
+        ]
+        
+        expected_test_jobs = [
+            "test_timeout_conditions_job"
         ]
         
         job_names = [job.name for job in repo.get_all_jobs()]
         
-        for expected in expected_at_jobs + expected_wst_jobs:
+        for expected in expected_at_jobs + expected_wst_jobs + expected_test_jobs:
             if expected in job_names:
                 print(f"✓ Expected job found: {expected}")
             else:
@@ -132,17 +139,26 @@ def test_op_configurations():
             test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
             wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
-            wst_atp_sync_media_to_training_op, sleepy_op
+            wst_atp_sync_media_to_training_op
         )
+        
+        from dagstributor.test_timeout_conditions import test_timeout_conditions_op
         
         wst_ops = [
             test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
             wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
-            wst_atp_sync_media_to_training_op, sleepy_op
+            wst_atp_sync_media_to_training_op
+        ]
+        
+        test_ops = [
+            test_timeout_conditions_op
         ]
         
         for op in wst_ops:
+            print(f"✓ Op configuration valid: {op.name}")
+        
+        for op in test_ops:
             print(f"✓ Op configuration valid: {op.name}")
         
         return True

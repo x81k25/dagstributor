@@ -62,7 +62,7 @@ schedules:
     cron_schedule: "0 23 * * *"  # daily at 23:00 UTC (17:00 CT)
     default_status: "RUNNING"
     
-  sleepy:
+  test_timeout_conditions:
     enabled: true
     cron_schedule: "17 * * * *"  # every hour at 17 minutes
     default_status: "RUNNING"

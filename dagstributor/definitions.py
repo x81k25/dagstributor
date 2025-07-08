@@ -22,7 +22,9 @@ from dagstributor.wiring_schema_tics.jobs import (
     wst_atp_bak_job, 
     wst_atp_reload_job,
     wst_atp_sync_media_to_training_job,
-    sleepy_job,
+)
+from dagstributor.test_timeout_conditions import (
+    test_timeout_conditions_job,
 )
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -39,7 +41,9 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
-    sleepy_schedule,
+)
+from dagstributor.test_timeout_conditions import (
+    test_timeout_conditions_schedule,
 )
 
 # All assets have been removed
@@ -66,7 +70,11 @@ wst_jobs = [
     wst_atp_bak_job,
     wst_atp_reload_job,
     wst_atp_sync_media_to_training_job,
-    sleepy_job,
+]
+
+# Define test jobs
+test_jobs = [
+    test_timeout_conditions_job,
 ]
 
 # Define all automatic transmission schedules
@@ -87,7 +95,11 @@ at_schedules = [
 wst_schedules = [
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
-    sleepy_schedule,
+]
+
+# Define test schedules
+test_schedules = [
+    test_timeout_conditions_schedule,
 ]
 
 # Configure resources
@@ -98,7 +110,7 @@ resources = {
 # Create the Definitions object
 defs = Definitions(
     assets=all_assets,
-    jobs=at_jobs + wst_jobs,
-    schedules=at_schedules + wst_schedules,
+    jobs=at_jobs + wst_jobs + test_jobs,
+    schedules=at_schedules + wst_schedules + test_schedules,
     resources=resources,
 )
