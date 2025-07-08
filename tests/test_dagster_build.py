@@ -71,8 +71,8 @@ def test_job_definitions():
         ]
         
         expected_wst_jobs = [
-            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_drop_job",
-            "wst_atp_instantiate_job", "wst_atp_reload_job", "wst_atp_bak_drop_reload_job"
+            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_reload_job",
+            "wst_atp_sync_media_to_training_job", "sleepy_job"
         ]
         
         job_names = [job.name for job in repo.get_all_jobs()]
@@ -129,15 +129,17 @@ def test_op_configurations():
             print(f"✓ Op configuration valid: {op.name}")
         
         from dagstributor.wiring_schema_tics.ops import (
-            test_db_connection_op, wst_atp_drop_op,
+            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
+            wst_atp_sync_media_to_training_op, sleepy_op
         )
         
         wst_ops = [
-            test_db_connection_op, wst_atp_drop_op,
+            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
+            wst_atp_sync_media_to_training_op, sleepy_op
         ]
         
         for op in wst_ops:
