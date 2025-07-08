@@ -8,7 +8,8 @@ import os
 from pathlib import Path
 
 # Add the dagstributor module to Python path
-sys.path.insert(0, str(Path(__file__).parent))
+# Since this script is now in tests/, we need to go up one level
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_imports():
     """Test that all modules can be imported"""
@@ -70,8 +71,8 @@ def test_job_definitions():
         ]
         
         expected_wst_jobs = [
-            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_drop_job",
-            "wst_atp_instantiate_job", "wst_atp_reload_job", "wst_atp_bak_drop_reload_job"
+            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_reload_job",
+            "wst_atp_sync_media_to_training_job", "sleepy_job"
         ]
         
         job_names = [job.name for job in repo.get_all_jobs()]
@@ -128,15 +129,17 @@ def test_op_configurations():
             print(f"✓ Op configuration valid: {op.name}")
         
         from dagstributor.wiring_schema_tics.ops import (
-            test_db_connection_op, wst_atp_drop_op,
+            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
+            wst_atp_sync_media_to_training_op, sleepy_op
         )
         
         wst_ops = [
-            test_db_connection_op, wst_atp_drop_op,
+            test_db_connection_op,
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_instantiate_media_op, wst_atp_instantiate_training_op, wst_atp_instantiate_prediction_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
+            wst_atp_sync_media_to_training_op, sleepy_op
         ]
         
         for op in wst_ops:
@@ -151,7 +154,7 @@ def test_workspace_yaml():
     """Test that workspace.yaml exists and is valid"""
     print("\nTesting workspace.yaml...")
     try:
-        workspace_path = Path(__file__).parent / "workspace.yaml"
+        workspace_path = Path(__file__).parent.parent / "workspace.yaml"
         if not workspace_path.exists():
             print(f"✗ workspace.yaml not found at {workspace_path}")
             return False

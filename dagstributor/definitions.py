@@ -20,11 +20,9 @@ from dagstributor.automatic_transmission.jobs import (
 from dagstributor.wiring_schema_tics.jobs import (
     test_db_connection_job, 
     wst_atp_bak_job, 
-    wst_atp_drop_job,
-    wst_atp_instantiate_job,
     wst_atp_reload_job,
-    wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
+    sleepy_job,
 )
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
@@ -41,6 +39,7 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
+    sleepy_schedule,
 )
 
 # All assets have been removed
@@ -65,11 +64,9 @@ at_jobs = [
 wst_jobs = [
     test_db_connection_job,
     wst_atp_bak_job,
-    wst_atp_drop_job,
-    wst_atp_instantiate_job,
     wst_atp_reload_job,
-    wst_atp_bak_drop_reload_job,
     wst_atp_sync_media_to_training_job,
+    sleepy_job,
 ]
 
 # Define all automatic transmission schedules
@@ -90,6 +87,7 @@ at_schedules = [
 wst_schedules = [
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
+    sleepy_schedule,
 ]
 
 # Configure resources

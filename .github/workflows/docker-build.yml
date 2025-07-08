@@ -58,7 +58,7 @@ jobs:
           docker run --rm \
             -e DAGSTER_HOME=/opt/dagster/app/dagstributor \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }} \
-            python /opt/dagster/app/dagstributor/test_dagster_build.py
+            python /opt/dagster/app/dagstributor/tests/test_dagster_build.py
 
       - name: Push Docker image
         uses: docker/build-push-action@v5

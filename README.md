@@ -93,7 +93,6 @@ This standardized approach ensures consistent behavior across all database opera
 ```
 dagstributor/
 ├── config/
-│   ├── dagster.yaml             # Dagster infrastructure configuration
 │   └── schedules/               # Environment-specific schedule configs
 │       ├── dev.yaml             # Development schedule settings
 │       ├── stg.yaml             # Staging schedule settings
@@ -121,6 +120,21 @@ dagstributor/
 ├── requirements.txt             # Python dependencies
 └── workspace.yaml               # Dagster workspace configuration
 ```
+
+## Configuration Management
+
+**⚠️ Important: Dagster configuration is managed entirely by Kubernetes manifests and environment variables.**
+
+- **No local `dagster.yaml` file is used** - Dagster auto-generates configuration from K8s environment
+- All Dagster settings (run launcher, storage, monitoring) are controlled via K8s ConfigMaps and Secrets
+- Environment variables like `DAGSTER_PG_*` and `DAGSTER_K8S_*` drive the configuration
+- Any infrastructure changes (timeouts, launchers, storage) must be made in K8s manifests, not application code
+
+This ensures:
+- Consistent configuration across environments
+- GitOps-managed infrastructure settings
+- No configuration drift between deployments
+- Simplified container builds
 
 ## Deployment & Environment Configuration
 
