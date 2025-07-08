@@ -161,19 +161,11 @@ def create_single_script_op(sql_filename, op_description):
 
 # Individual script ops using factory function
 test_db_connection_op = create_single_script_op("test.sql", "Database connection test")
-wst_atp_drop_op = create_single_script_op("ddl/00_drop_schema.sql", "Schema drop")
 
 # Backup ops
 wst_atp_bak_media_op = create_single_script_op("bak/bak_media.sql", "Media backup")
 wst_atp_bak_prediction_op = create_single_script_op("bak/bak_prediction.sql", "Prediction backup")
 wst_atp_bak_training_op = create_single_script_op("bak/bak_training.sql", "Training backup")
-
-# Instantiate ops
-wst_atp_instantiate_media_op = create_single_script_op("ddl/01_instantiate_media.sql", "Media instantiation")
-wst_atp_instantiate_training_op = create_single_script_op("ddl/02_instantiate_training.sql", "Training instantiation")
-wst_atp_instantiate_prediction_op = create_single_script_op("ddl/03_instantiate_prediction.sql", "Prediction instantiation")
-wst_atp_instantiate_test_op = create_single_script_op("ddl/04_instantiate_test.sql", "Test schema instantiation")
-wst_atp_set_perms_op = create_single_script_op("ddl/10_set_perms.sql", "Permissions setting")
 
 # Reload ops
 wst_atp_reload_media_op = create_single_script_op("bak/reload_media.sql", "Media reload")
