@@ -5,7 +5,7 @@ from dagster import job
 # Global job configuration  
 JOB_CONFIG = {
     "tags": {
-        "dagster/max_runtime": "600",  # 10 minutes
+        "dagster/max_runtime": "7200",  # 2 hours for ML training pipeline
         "service": "reel-driver",
     }
 }
