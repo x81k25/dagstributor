@@ -25,6 +25,9 @@ from dagstributor.test_jobs.jobs import (
     test_db_connection_job,
     test_timeout_conditions_job,
 )
+from dagstributor.reel_driver.jobs import (
+    reel_driver_training_pipeline_job,
+)
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
     at_02_collect_schedule,
@@ -66,6 +69,8 @@ def dagstributor_repo():
         # Test jobs
         test_db_connection_job,
         test_timeout_conditions_job,
+        # Reel driver jobs
+        reel_driver_training_pipeline_job,
         # Automatic transmission schedules
         at_01_rss_ingest_schedule,
         at_02_collect_schedule,
