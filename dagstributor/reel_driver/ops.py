@@ -9,7 +9,7 @@ def get_image_tag():
     env = os.getenv('ENVIRONMENT', 'dev')
     return 'main' if env == 'prod' else env
 
-# Global K8s job configuration
+# Global K8s job configuration for ML workloads
 BASE_K8S_CONFIG = {
     "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
@@ -28,8 +28,8 @@ BASE_K8S_CONFIG = {
         "wst-secrets"
     ],
     "job_spec_config": {
-        "activeDeadlineSeconds": 60,  # 60 seconds global K8s operation timeout
-        "backoffLimit": 0
+        "activeDeadlineSeconds": 3600,  # 1 hour timeout for ML workloads
+        "backoffLimit": 1  # Allow 1 retry for transient failures
     },
 }
 
