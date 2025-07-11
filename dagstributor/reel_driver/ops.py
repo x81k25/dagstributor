@@ -14,18 +14,13 @@ BASE_K8S_CONFIG = {
     "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
     "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
     "env_config_maps": [
-        "at-config",
         "environment",
-        "transmission-config",
-        "rear-diff-config",
         "reel-driver-config",
-        "wst-config"
+        "reel-driver-training-config"
     ],
     "env_secrets": [
-        "at-secrets",
-        "transmission-secrets",
-        "rear-diff-secrets",
-        "wst-secrets"
+        "reel-driver-secrets",
+        "reel-driver-training-secrets"
     ],
     "job_spec_config": {
         "activeDeadlineSeconds": 3600,  # 1 hour timeout for ML workloads
