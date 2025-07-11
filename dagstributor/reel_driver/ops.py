@@ -40,7 +40,7 @@ reel_driver_training_feature_engineering_op = k8s_job_op.configured(
 reel_driver_model_training_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
-        "image": "ghcr.io/x81k25/reel-driver/reel-driver-model-training:latest",
+        "image": "ghcr.io/x81k25/reel-driver/reel-driver-model-training:sha-31843a01",
     },
     name="reel_driver_model_training_op"
 )
