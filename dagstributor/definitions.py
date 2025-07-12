@@ -45,6 +45,9 @@ from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
 )
+from dagstributor.reel_driver.schedules import (
+    reel_driver_training_pipeline_schedule,
+)
 
 # All assets have been removed
 all_assets = []
@@ -105,6 +108,11 @@ wst_schedules = [
 # Define test schedules
 test_schedules = []
 
+# Define reel-driver schedules
+reel_driver_schedules = [
+    reel_driver_training_pipeline_schedule,
+]
+
 # Configure resources
 resources = {
     "postgres": postgres_resource
@@ -114,6 +122,6 @@ resources = {
 defs = Definitions(
     assets=all_assets,
     jobs=at_jobs + wst_jobs + test_jobs + reel_driver_jobs,
-    schedules=at_schedules + wst_schedules,
+    schedules=at_schedules + wst_schedules + reel_driver_schedules,
     resources=resources,
 )
