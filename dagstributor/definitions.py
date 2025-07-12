@@ -26,6 +26,9 @@ from dagstributor.test_jobs.jobs import (
     test_db_connection_job,
     test_timeout_conditions_job,
 )
+from dagstributor.reel_driver.jobs import (
+    reel_driver_training_pipeline_job,
+)
 from dagstributor.automatic_transmission.schedules import (
     at_01_rss_ingest_schedule,
     at_02_collect_schedule,
@@ -41,6 +44,9 @@ from dagstributor.automatic_transmission.schedules import (
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
+)
+from dagstributor.reel_driver.schedules import (
+    reel_driver_training_pipeline_schedule,
 )
 
 # All assets have been removed
@@ -74,6 +80,11 @@ test_jobs = [
     test_timeout_conditions_job,
 ]
 
+# Define reel-driver jobs
+reel_driver_jobs = [
+    reel_driver_training_pipeline_job,
+]
+
 # Define all automatic transmission schedules
 at_schedules = [
     at_01_rss_ingest_schedule,
@@ -97,6 +108,11 @@ wst_schedules = [
 # Define test schedules
 test_schedules = []
 
+# Define reel-driver schedules
+reel_driver_schedules = [
+    reel_driver_training_pipeline_schedule,
+]
+
 # Configure resources
 resources = {
     "postgres": postgres_resource
@@ -105,7 +121,7 @@ resources = {
 # Create the Definitions object
 defs = Definitions(
     assets=all_assets,
-    jobs=at_jobs + wst_jobs + test_jobs,
-    schedules=at_schedules + wst_schedules,
+    jobs=at_jobs + wst_jobs + test_jobs + reel_driver_jobs,
+    schedules=at_schedules + wst_schedules + reel_driver_schedules,
     resources=resources,
 )
