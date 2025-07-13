@@ -32,7 +32,7 @@ BASE_K8S_CONFIG = {
 reel_driver_training_feature_engineering_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
-        "image": f"ghcr.io/x81k25/reel-driver/training-feature-engineering:{get_image_tag()}",
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
     },
     name="reel_driver_training_feature_engineering_op"
 )
