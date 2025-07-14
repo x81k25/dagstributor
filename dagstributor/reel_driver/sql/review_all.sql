@@ -1,2 +1,2 @@
 update atp.training
-set reviewed = False;
+set reviewed = True;
