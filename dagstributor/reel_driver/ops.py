@@ -1,9 +1,53 @@
-from dagster import op, Out, Output
+"""Kubernetes container execution ops for reel-driver pipeline."""
+
+import os
+from dagster import op, OpExecutionContext, Out, Output
+from dagster_k8s import k8s_job_op
 from pathlib import Path
 import psycopg2
 import psycopg2.extras
-import os
 import re
+
+# Image tag logic: prod environment uses 'main' tags, others use environment name
+def get_image_tag():
+    env = os.getenv('ENVIRONMENT', 'dev')
+    return 'main' if env == 'prod' else env
+
+# Global K8s job configuration for ML workloads
+BASE_K8S_CONFIG = {
+    "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
+    "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
+    "env_config_maps": [
+        "environment",
+        "reel-driver-config",
+        "reel-driver-training-config"
+    ],
+    "env_secrets": [
+        "reel-driver-secrets",
+        "reel-driver-training-secrets"
+    ],
+    "job_spec_config": {
+        "activeDeadlineSeconds": 3600,  # 1 hour timeout for ML workloads
+        "backoffLimit": 1  # Allow 1 retry for transient failures
+    },
+}
+
+
+reel_driver_training_feature_engineering_op = k8s_job_op.configured(
+    {
+        **BASE_K8S_CONFIG,
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
+    },
+    name="reel_driver_training_feature_engineering_op"
+)
+
+reel_driver_model_training_op = k8s_job_op.configured(
+    {
+        **BASE_K8S_CONFIG,
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
+    },
+    name="reel_driver_model_training_op"
+)
 
 
 def execute_sql_file(context, sql_filename):
@@ -159,15 +203,5 @@ def create_single_script_op(sql_filename, op_description):
     return sql_op
 
 
-# Backup ops
-wst_atp_bak_media_op = create_single_script_op("bak/bak_media.sql", "Media backup")
-wst_atp_bak_prediction_op = create_single_script_op("bak/bak_prediction.sql", "Prediction backup")
-wst_atp_bak_training_op = create_single_script_op("bak/bak_training.sql", "Training backup")
-
-# Reload ops
-wst_atp_reload_media_op = create_single_script_op("bak/reload_media.sql", "Media reload")
-wst_atp_reload_training_op = create_single_script_op("bak/reload_training.sql", "Training reload")
-wst_atp_reload_prediction_op = create_single_script_op("bak/reload_prediction.sql", "Prediction reload")
-
-# Sync ops
-wst_atp_sync_media_to_training_op = create_single_script_op("sync/media_to_training.sql", "Media to training sync")
+# Review all op
+reel_driver_review_all_op = create_single_script_op("review_all.sql", "Review all reset")
