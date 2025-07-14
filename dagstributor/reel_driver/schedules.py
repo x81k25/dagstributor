@@ -34,7 +34,10 @@ def _load_config():
 # Global config loaded at import time
 CONFIG = _load_config()
 
+# List to collect schedules that should be exposed
+schedules = []
 
+# Always create training schedule as it exists in all environments
 @schedule(
     job=reel_driver_training_job,
     cron_schedule=CONFIG["schedules"]["reel_driver_training"]["cron_schedule"],
@@ -45,13 +48,18 @@ def reel_driver_training_schedule():
     """Reel Driver training pipeline runs daily at 06:00 (dev) or 07:00 (stg)."""
     return {}
 
+schedules.append(reel_driver_training_schedule)
 
-@schedule(
-    job=reel_driver_review_all_job,
-    cron_schedule=CONFIG["schedules"]["reel_driver_review_all"]["cron_schedule"],
-    name="reel_driver_review_all_schedule",
-    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_review_all"]["default_status"])
-)
-def reel_driver_review_all_schedule():
-    """Reel Driver review all runs daily at 05:00 CT."""
-    return {}
+# Conditionally create review_all schedule only if it exists in config
+if "reel_driver_review_all" in CONFIG["schedules"]:
+    @schedule(
+        job=reel_driver_review_all_job,
+        cron_schedule=CONFIG["schedules"]["reel_driver_review_all"]["cron_schedule"],
+        name="reel_driver_review_all_schedule",
+        default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_review_all"]["default_status"])
+    )
+    def reel_driver_review_all_schedule():
+        """Reel Driver review all runs daily at 05:00 CT."""
+        return {}
+    
+    schedules.append(reel_driver_review_all_schedule)
