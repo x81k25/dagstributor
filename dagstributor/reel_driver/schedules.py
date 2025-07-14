@@ -5,7 +5,7 @@ import yaml
 from pathlib import Path
 from dagster import schedule, DefaultScheduleStatus
 
-from .jobs import reel_driver_training_pipeline_job
+from .jobs import reel_driver_training_job, reel_driver_review_all_job
 
 
 # Load configuration at module level for use in decorators
@@ -36,11 +36,22 @@ CONFIG = _load_config()
 
 
 @schedule(
-    job=reel_driver_training_pipeline_job,
-    cron_schedule=CONFIG["schedules"]["reel_driver_training_pipeline"]["cron_schedule"],
-    name="reel_driver_training_pipeline_schedule",
-    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_pipeline"]["default_status"])
+    job=reel_driver_training_job,
+    cron_schedule=CONFIG["schedules"]["reel_driver_training"]["cron_schedule"],
+    name="reel_driver_training_schedule",
+    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training"]["default_status"])
 )
-def reel_driver_training_pipeline_schedule():
+def reel_driver_training_schedule():
     """Reel Driver training pipeline runs daily at 06:00 (dev) or 07:00 (stg)."""
+    return {}
+
+
+@schedule(
+    job=reel_driver_review_all_job,
+    cron_schedule=CONFIG["schedules"]["reel_driver_review_all"]["cron_schedule"],
+    name="reel_driver_review_all_schedule",
+    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_review_all"]["default_status"])
+)
+def reel_driver_review_all_schedule():
+    """Reel Driver review all runs daily at 05:00 CT."""
     return {}

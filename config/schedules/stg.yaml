@@ -54,15 +54,20 @@ schedules:
     
   wst_atp_bak:
     enabled: true
-    cron_schedule: "57 4 1 * *"  # monthly on 1st at 04:57
+    cron_schedule: "57 9 1 * *"  # monthly on 1st at 04:57 CT
     default_status: "RUNNING"
     
   wst_atp_sync_media_to_training:
     enabled: true
-    cron_schedule: "0 9 * * 1"  # weekly on Monday at 09:00 UTC (03:00 CT)
+    cron_schedule: "0 8 * * 1"  # weekly on Monday at 03:00 CT
     default_status: "RUNNING"
     
-  reel_driver_training_pipeline:
+  reel_driver_review_all:
     enabled: true
-    cron_schedule: "0 7 * * *"  # daily at 07:00
+    cron_schedule: "0 10 * * *"  # daily at 05:00 CT
+    default_status: "RUNNING"
+
+  reel_driver_training:
+    enabled: true
+    cron_schedule: "0 12 * * *"  # daily at 07:00 CT
     default_status: "RUNNING"

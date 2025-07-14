@@ -4,65 +4,72 @@
 schedules:
   at_01_rss_ingest:
     enabled: true
-    cron_schedule: "0 0 * * *"  # nightly at 00:00
+    cron_schedule: "0 5 * * *"  # nightly at 00:00 CT
     default_status: "RUNNING"
     
   at_02_collect:
     enabled: true
-    cron_schedule: "6 0 * * *"  # nightly at 00:06
+    cron_schedule: "6 5 * * *"  # nightly at 00:06 CT
     default_status: "RUNNING"
     
   at_03_parse:
     enabled: true
-    cron_schedule: "12 0 * * *"  # nightly at 00:12
+    cron_schedule: "12 5 * * *"  # nightly at 00:12 CT
     default_status: "RUNNING"
     
   at_04_file_filtration:
     enabled: true
-    cron_schedule: "18 0 * * *"  # nightly at 00:18
+    cron_schedule: "18 5 * * *"  # nightly at 00:18 CT
     default_status: "RUNNING"
     
   at_05_metadata_collection:
     enabled: true
-    cron_schedule: "24 0 * * *"  # nightly at 00:24
+    cron_schedule: "24 5 * * *"  # nightly at 00:24 CT
     default_status: "RUNNING"
     
   at_06_media_filtration:
     enabled: true
-    cron_schedule: "30 0 * * *"  # nightly at 00:30
+    cron_schedule: "30 5 * * *"  # nightly at 00:30 CT
     default_status: "RUNNING"
     
   at_07_initiation:
     enabled: true
-    cron_schedule: "36 0 * * *"  # nightly at 00:36
+    cron_schedule: "36 5 * * *"  # nightly at 00:36 CT
     default_status: "RUNNING"
     
   at_08_download_check:
     enabled: true
-    cron_schedule: "42 0 * * *"  # nightly at 00:42
+    cron_schedule: "42 5 * * *"  # nightly at 00:42 CT
     default_status: "RUNNING"
     
   at_09_transfer:
     enabled: true
-    cron_schedule: "48 0 * * *"  # nightly at 00:48
+    cron_schedule: "48 5 * * *"  # nightly at 00:48 CT
     default_status: "RUNNING"
     
   at_10_cleanup:
     enabled: true
-    cron_schedule: "54 0 * * *"  # nightly at 00:54
+    cron_schedule: "54 5 * * *"  # nightly at 00:54 CT
     default_status: "RUNNING"
     
   wst_atp_bak:
     enabled: true
-    cron_schedule: "57 4 1 * *"  # monthly on 1st at 04:57
+    cron_schedule: "57 9 1 * *"  # monthly on 1st at 04:57 CT
     default_status: "RUNNING"
     
   wst_atp_sync_media_to_training:
     enabled: true
-    cron_schedule: "0 9 * * 1"  # weekly on Monday at 09:00 UTC (03:00 CT)
+    cron_schedule: "0 8 * * 1"  # weekly on Monday 03:00 CT
+    default_status: "RUNNING"
+
+  reel_driver_review_all:
+    enabled: true
+    cron_schedule: "0 10 * * *"  # daily at 05:00 CT
+    default_status: "RUNNING"
+
+  reel_driver_training:
+    enabled: true
+    cron_schedule: "0 11 * * *"  # daily at 06:00 CT
     default_status: "RUNNING"
     
-  reel_driver_training_pipeline:
-    enabled: true
-    cron_schedule: "0 6 * * *"  # daily at 06:00
-    default_status: "RUNNING"
+  
