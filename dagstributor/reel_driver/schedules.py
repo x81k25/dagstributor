@@ -37,11 +37,11 @@ CONFIG = _load_config()
 
 @schedule(
     job=reel_driver_training_job,
-    cron_schedule=CONFIG["schedules"]["reel_driver_training_pipeline"]["cron_schedule"],
-    name="reel_driver_training_pipeline_schedule",
-    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_pipeline"]["default_status"])
+    cron_schedule=CONFIG["schedules"]["reel_driver_training"]["cron_schedule"],
+    name="reel_driver_training_schedule",
+    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training"]["default_status"])
 )
-def reel_driver_training_pipeline_schedule():
+def reel_driver_training_schedule():
     """Reel Driver training pipeline runs daily at 06:00 (dev) or 07:00 (stg)."""
     return {}
 

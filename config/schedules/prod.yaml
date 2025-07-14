@@ -61,3 +61,9 @@ schedules:
     enabled: true
     cron_schedule: "0 23 * * *"  # daily at 23:00 UTC (17:00 CT)
     default_status: "RUNNING"
+
+  reel_driver_training:
+    enabled: true
+    cron_schedule: "0 13 * * 1"  # weekly on Monday at 08:00 CT
+    default_status: "RUNNING"
+    

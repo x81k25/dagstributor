@@ -61,13 +61,15 @@ schedules:
     enabled: true
     cron_schedule: "0 8 * * 1"  # weekly on Monday 03:00 CT
     default_status: "RUNNING"
-    
-  reel_driver_training_pipeline:
-    enabled: true
-    cron_schedule: "0 11 * * *"  # daily at 06:00 CT
-    default_status: "RUNNING"
-    
+
   reel_driver_review_all:
     enabled: true
     cron_schedule: "0 10 * * *"  # daily at 05:00 CT
     default_status: "RUNNING"
+
+  reel_driver_training:
+    enabled: true
+    cron_schedule: "0 11 * * *"  # daily at 06:00 CT
+    default_status: "RUNNING"
+    
+  

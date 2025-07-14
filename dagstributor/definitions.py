@@ -47,7 +47,8 @@ from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_sync_media_to_training_schedule,
 )
 from dagstributor.reel_driver.schedules import (
-    reel_driver_training_pipeline_schedule,
+    reel_driver_training_schedule,
+    reel_driver_review_all_schedule,
 )
 
 # All assets have been removed
@@ -112,7 +113,8 @@ test_schedules = []
 
 # Define reel-driver schedules
 reel_driver_schedules = [
-    reel_driver_training_pipeline_schedule,
+    reel_driver_training_schedule,
+    reel_driver_review_all_schedule,
 ]
 
 # Configure resources
