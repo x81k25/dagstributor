@@ -5,7 +5,7 @@ import yaml
 from pathlib import Path
 from dagster import schedule, DefaultScheduleStatus
 
-from .jobs import reel_driver_training_pipeline_job
+from .jobs import reel_driver_training_job
 
 
 # Load configuration at module level for use in decorators
@@ -36,7 +36,7 @@ CONFIG = _load_config()
 
 
 @schedule(
-    job=reel_driver_training_pipeline_job,
+    job=reel_driver_training_job,
     cron_schedule=CONFIG["schedules"]["reel_driver_training_pipeline"]["cron_schedule"],
     name="reel_driver_training_pipeline_schedule",
     default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_pipeline"]["default_status"])
