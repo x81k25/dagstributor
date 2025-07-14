@@ -34,7 +34,10 @@ def _load_config():
 # Global config loaded at import time
 CONFIG = _load_config()
 
+# List to collect schedules that should be exposed
+schedules = []
 
+# Always create training schedule as it exists in all environments
 @schedule(
     job=reel_driver_training_job,
     cron_schedule=CONFIG["schedules"]["reel_driver_training"]["cron_schedule"],
@@ -44,7 +47,6 @@ CONFIG = _load_config()
 def reel_driver_training_schedule():
     """Reel Driver training pipeline runs daily at 06:00 (dev) or 07:00 (stg)."""
     return {}
-
 
 @schedule(
     job=reel_driver_review_all_job,
