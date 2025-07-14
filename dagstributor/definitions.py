@@ -46,7 +46,6 @@ from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
 )
-
 from dagstributor.reel_driver.schedules import schedules as reel_driver_env_schedules
 
 # All assets have been removed
