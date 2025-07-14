@@ -66,3 +66,8 @@ schedules:
     enabled: true
     cron_schedule: "0 11 * * *"  # daily at 06:00 CT
     default_status: "RUNNING"
+    
+  reel_driver_review_all:
+    enabled: true
+    cron_schedule: "0 10 * * *"  # daily at 05:00 CT
+    default_status: "RUNNING"
