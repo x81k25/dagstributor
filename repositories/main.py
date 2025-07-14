@@ -45,6 +45,10 @@ from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
     wst_atp_sync_media_to_training_schedule,
 )
+from dagstributor.reel_driver.schedules import (
+    reel_driver_training_schedule,
+    reel_driver_review_all_schedule,
+)
 
 
 @repository
@@ -87,4 +91,7 @@ def dagstributor_repo():
         # Wiring schema-tics schedules
         wst_atp_bak_schedule,
         wst_atp_sync_media_to_training_schedule,
+        # Reel driver schedules
+        reel_driver_training_schedule,
+        reel_driver_review_all_schedule,
     ]
