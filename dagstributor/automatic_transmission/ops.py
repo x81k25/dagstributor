@@ -12,7 +12,7 @@ def get_image_tag():
 # Global K8s job configuration
 BASE_K8S_CONFIG = {
     "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
-    "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
+    "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
     "env_config_maps": [
         "at-config",
         "environment",

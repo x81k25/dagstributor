@@ -16,7 +16,7 @@ def get_image_tag():
 # Global K8s job configuration for ML workloads
 BASE_K8S_CONFIG = {
     "namespace": "ai-ml",
-    "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
+    "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
     "env_config_maps": [
         "environment",
         "reel-driver-config",
