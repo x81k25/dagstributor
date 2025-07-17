@@ -72,7 +72,15 @@ def at_08_download_check_job():
     at_08_download_check_op()
 
 
-@job(**JOB_CONFIG)
+# Transfer job with extended timeout
+AT_09_TRANSFER_JOB_CONFIG = {
+    "tags": {
+        "dagster/max_runtime": "600",  # 10 minutes for transfer operations
+        "service": "at",
+    }
+}
+
+@job(**AT_09_TRANSFER_JOB_CONFIG)
 def at_09_transfer_job():
     """Transfer job - runs at :48 minutes."""
     at_09_transfer_op()
