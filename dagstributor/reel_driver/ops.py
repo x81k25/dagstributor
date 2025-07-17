@@ -15,7 +15,7 @@ def get_image_tag():
 
 # Global K8s job configuration for ML workloads
 BASE_K8S_CONFIG = {
-    "namespace": f"media-{os.getenv('ENVIRONMENT', 'dev')}",
+    "namespace": "ai-ml",
     "image_pull_secrets": [{"name": "ghcr-pull-image-token"}],
     "env_config_maps": [
         "environment",
