@@ -10,32 +10,34 @@ import re
 
 # Image tag logic: prod environment uses 'main' tags, others use environment name
 def get_image_tag():
-    env = os.getenv('ENVIRONMENT', 'dev')
+    env = os.getenv('ENVIRONMENT')
     return 'main' if env == 'prod' else env
 
 # Global K8s job configuration for ML workloads
-BASE_K8S_CONFIG = {
-    "namespace": "ai-ml",
-    "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
-    "env_config_maps": [
-        "environment",
-        "reel-driver-config",
-        "reel-driver-training-config"
-    ],
-    "env_secrets": [
-        "reel-driver-secrets",
-        "reel-driver-training-secrets"
-    ],
-    "job_spec_config": {
-        "activeDeadlineSeconds": 3600,  # 1 hour timeout for ML workloads
-        "backoffLimit": 1  # Allow 1 retry for transient failures
-    },
-}
+def get_base_k8s_config():
+    env = os.getenv('ENVIRONMENT')
+    return {
+        "namespace": "ai-ml",
+        "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
+        "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
+        "env_config_maps": [
+            f"reel-driver-config-{env}",
+            f"reel-driver-training-config-{env}"
+        ],
+        "env_secrets": [
+            f"reel-driver-secrets-{env}",
+            f"reel-driver-training-secrets-{env}"
+        ],
+        "job_spec_config": {
+            "activeDeadlineSeconds": 3600,  # 1 hour timeout for ML workloads
+            "backoffLimit": 1  # Allow 1 retry for transient failures
+        },
+    }
 
 
 reel_driver_training_feature_engineering_op = k8s_job_op.configured(
     {
-        **BASE_K8S_CONFIG,
+        **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
     },
     name="reel_driver_training_feature_engineering_op"
@@ -43,7 +45,7 @@ reel_driver_training_feature_engineering_op = k8s_job_op.configured(
 
 reel_driver_model_training_op = k8s_job_op.configured(
     {
-        **BASE_K8S_CONFIG,
+        **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
     },
     name="reel_driver_model_training_op"
