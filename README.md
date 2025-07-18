@@ -181,7 +181,7 @@ The wiring_schema_tics module requires the following PostgreSQL environment vari
 ### Kubernetes Configuration
 
 The Automatic Transmission jobs use the following Kubernetes resources:
-
+ 
 #### ConfigMaps
 - `at-config` - AT-specific configuration settings
 - `environment` - Environment-specific settings
