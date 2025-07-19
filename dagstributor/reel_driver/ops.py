@@ -50,8 +50,12 @@ reel_driver_model_training_op = k8s_job_op.configured(
         "container_config": {
             "resources": {
                 "limits": {
+                    "cpu": "8",
+                    "memory": "8Gi"
+                },
+                "requests": {
                     "cpu": "4",
-                    "memory": "16Gi"
+                    "memory": "4Gi"
                 }
             }
         },
