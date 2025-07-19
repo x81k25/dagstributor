@@ -47,6 +47,18 @@ reel_driver_model_training_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
+        "container_config": {
+            "resources": {
+                "limits": {
+                    "cpu": "4",
+                    "memory": "16Gi"
+                }
+            }
+        },
+        "job_spec_config": {
+            "activeDeadlineSeconds": 7200,  # 2 hours timeout for model training
+            "backoffLimit": 1  # Allow 1 retry for transient failures
+        },
     },
     name="reel_driver_model_training_op"
 )
