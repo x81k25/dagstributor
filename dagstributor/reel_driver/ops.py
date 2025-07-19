@@ -34,7 +34,6 @@ def get_base_k8s_config():
         },
     }
 
-
 reel_driver_training_feature_engineering_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
