@@ -50,7 +50,7 @@ reel_driver_training_feature_engineering_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
-        "job_name": "reel-driver-feature-engineering",
+        "k8s_job_name": "reel-driver-feature-engineering",
     },
     name="reel_driver_training_feature_engineering_op"
 )
@@ -59,7 +59,7 @@ reel_driver_model_training_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
-        "job_name": "reel-driver-model-training",
+        "k8s_job_name": "reel-driver-model-training",
     },
     name="reel_driver_model_training_op"
 )
