@@ -38,6 +38,7 @@ at_01_rss_ingest_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-01-rss-ingest:{get_image_tag()}",
+        "job_name": "at-01-rss-ingest",
     },
     name="at_01_rss_ingest_op"
 )
@@ -46,6 +47,7 @@ at_02_collect_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-02-collect:{get_image_tag()}",
+        "job_name": "at-02-collect",
     },
     name="at_02_collect_op"
 )
@@ -54,6 +56,7 @@ at_03_parse_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-03-parse:{get_image_tag()}",
+        "job_name": "at-03-parse",
     },
     name="at_03_parse_op"
 )
@@ -62,6 +65,7 @@ at_04_file_filtration_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-04-file-filtration:{get_image_tag()}",
+        "job_name": "at-04-file-filtration",
     },
     name="at_04_file_filtration_op"
 )
@@ -70,6 +74,7 @@ at_05_metadata_collection_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-05-metadata-collection:{get_image_tag()}",
+        "job_name": "at-05-metadata-collection",
     },
     name="at_05_metadata_collection_op"
 )
@@ -78,6 +83,7 @@ at_06_media_filtration_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-06-media-filtration:{get_image_tag()}",
+        "job_name": "at-06-media-filtration",
     },
     name="at_06_media_filtration_op"
 )
@@ -86,6 +92,7 @@ at_07_initiation_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-07-initiation:{get_image_tag()}",
+        "job_name": "at-07-initiation",
     },
     name="at_07_initiation_op"
 )
@@ -94,6 +101,7 @@ at_08_download_check_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-08-download-check:{get_image_tag()}",
+        "job_name": "at-08-download-check",
     },
     name="at_08_download_check_op"
 )
@@ -107,6 +115,7 @@ at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        "job_name": "at-09-transfer",
         # Environment variables now available via at-config ConfigMap injection
         "container_config": {
             "volume_mounts": [
@@ -160,6 +169,7 @@ at_10_cleanup_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-10-cleanup:{get_image_tag()}",
+        "job_name": "at-10-cleanup",
     },
     name="at_10_cleanup_op"
 )
