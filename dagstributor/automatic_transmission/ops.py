@@ -131,6 +131,10 @@ at_09_transfer_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        "job_spec_config": {
+            "activeDeadlineSeconds": 600,  # 10 minutes for transfer operations
+            "backoffLimit": 0
+        },
         # Environment variables now available via at-config ConfigMap injection
         "container_config": {
             "name": "at-09-transfer",
