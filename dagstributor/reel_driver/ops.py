@@ -41,7 +41,7 @@ def get_base_k8s_config():
             }
         },
         "job_spec_config": {
-            "activeDeadlineSeconds": 7200,  # 2 hours timeout for ML workloads
+            "activeDeadlineSeconds": 43200,  # 12 hours timeout for ML workloads
             "backoffLimit": 1  # Allow 1 retry for transient failures
         },
     }
