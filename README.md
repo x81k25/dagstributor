@@ -8,7 +8,7 @@ Dagstributor is a comprehensive data pipeline system that automates the ingestio
 
 ## Architecture
 
-The system consists of two main components:
+The system consists of three main components:
 
 ### Automatic Transmission Pipeline (11 jobs)
 
@@ -24,6 +24,13 @@ Sequential data processing pipeline:
 9. **at_09_transfer_job** - Transfers completed downloads
 10. **at_10_cleanup_job** - Removes temporary files and data
 11. **at_full_pipeline_job** - Executes the complete pipeline sequence
+
+### Reel Driver Pipeline (2 jobs)
+
+Machine learning pipeline for media recommendation and classification:
+1. **reel_driver_training_feature_engineering_op** - Processes training data and creates engineered features
+2. **reel_driver_model_training_op** - Trains XGBoost models and stores in MLflow registry
+3. **reel_driver_training_job** - Complete ML pipeline combining both operations
 
 ### Wiring Schema Tics (6 jobs)
 
@@ -98,12 +105,17 @@ dagstributor/
 │       ├── stg.yaml             # Staging schedule settings
 │       └── prod.yaml            # Production schedule settings
 ├── dagstributor/
-│   ├── automatic_transmission/  # Automatic Transmission pipeline (10 jobs)
+│   ├── automatic_transmission/  # Automatic Transmission pipeline (11 jobs)
 │   │   ├── __init__.py
 │   │   ├── config_loader.py     # YAML schedule config loader
 │   │   ├── jobs.py              # Job definitions (at_01 through at_10 + full pipeline)
 │   │   ├── ops.py               # K8s operation implementations
 │   │   └── schedules.py         # Schedule configurations
+│   ├── reel_driver/             # Machine learning pipeline (2 jobs)
+│   │   ├── __init__.py
+│   │   ├── jobs.py              # ML job definitions (feature engineering + model training)
+│   │   ├── ops.py               # K8s ML operation implementations
+│   │   └── sql/                 # SQL scripts for ML data operations
 │   ├── wiring_schema_tics/      # Database schema management (6 jobs)
 │   │   ├── __init__.py
 │   │   ├── jobs.py              # Database management jobs
@@ -161,7 +173,7 @@ The system is deployed via Docker images with automatic GitOps workflows:
 #### Validation Tests
 The build pipeline validates:
 - All Python imports load correctly
-- Repository definition loads (17 jobs + 10 schedules)
+- Repository definition loads (19 jobs + 10 schedules)
 - All ops have valid configurations
 - workspace.yaml structure is correct
 
@@ -245,6 +257,9 @@ dagster job list -f repositories/main.py
 
 # Execute a specific job
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job
+
+# Execute reel driver ML jobs
+dagster job execute -f repositories/main.py -j reel_driver_training_job
 
 # Execute wiring schema tics jobs
 dagster job execute -f repositories/main.py -j test_db_connection_job
