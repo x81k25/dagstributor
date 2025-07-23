@@ -38,6 +38,9 @@ at_01_rss_ingest_op = k8s_job_op.configured(
     {
         **BASE_K8S_CONFIG,
         "image": f"ghcr.io/x81k25/automatic-transmission/at-01-rss-ingest:{get_image_tag()}",
+        "container_config": {
+            "name": "at-01-rss-ingest"
+        }
     },
     name="at_01_rss_ingest_op"
 )
