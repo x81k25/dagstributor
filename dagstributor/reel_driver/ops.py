@@ -28,7 +28,18 @@ def get_base_k8s_config():
             f"reel-driver-secrets-{env}",
             f"reel-driver-training-secrets-{env}"
         ],
-
+        "container_config": {
+            "resources": {
+                "limits": {
+                    "cpu": "8",
+                    "memory": "8Gi"
+                },
+                "requests": {
+                    "cpu": "2",
+                    "memory": "2Gi"
+                }
+            }
+        },
         "job_spec_config": {
             "activeDeadlineSeconds": 7200,  # 2 hours timeout for ML workloads
             "backoffLimit": 1  # Allow 1 retry for transient failures
@@ -41,17 +52,8 @@ reel_driver_training_feature_engineering_op = k8s_job_op.configured(
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
         "container_config": {
-            "name": "reel-driver-feature-engineering",
-            "resources": {
-                "limits": {
-                    "cpu": "8",
-                    "memory": "8Gi"
-                },
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
+            **get_base_k8s_config()["container_config"],
+            "name": "reel-driver-feature-engineering"
         }
     },
     name="reel_driver_training_feature_engineering_op"
@@ -62,17 +64,8 @@ reel_driver_model_training_op = k8s_job_op.configured(
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
         "container_config": {
-            "name": "reel-driver-model-training",
-            "resources": {
-                "limits": {
-                    "cpu": "8",
-                    "memory": "8Gi"
-                },
-                "requests": {
-                    "cpu": "2",
-                    "memory": "2Gi"
-                }
-            }
+            **get_base_k8s_config()["container_config"],
+            "name": "reel-driver-model-training"
         }
     },
     name="reel_driver_model_training_op"
