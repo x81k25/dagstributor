@@ -28,7 +28,6 @@ def get_base_k8s_config():
             f"reel-driver-secrets-{env}",
             f"reel-driver-training-secrets-{env}"
         ],
-
         "container_config": {
             "resources": {
                 "limits": {
@@ -52,6 +51,10 @@ reel_driver_training_feature_engineering_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
+        "container_config": {
+            **get_base_k8s_config()["container_config"],
+            "name": "reel-driver-feature-engineering"
+        }
     },
     name="reel_driver_training_feature_engineering_op"
 )
@@ -60,6 +63,10 @@ reel_driver_model_training_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
         "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
+        "container_config": {
+            **get_base_k8s_config()["container_config"],
+            "name": "reel-driver-model-training"
+        }
     },
     name="reel_driver_model_training_op"
 )
