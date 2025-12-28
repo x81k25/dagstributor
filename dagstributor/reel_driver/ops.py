@@ -8,14 +8,32 @@ import psycopg2
 import psycopg2.extras
 import re
 
+
+def get_environment():
+    """Get and validate ENVIRONMENT variable. Fails if not set."""
+    env = os.environ.get('ENVIRONMENT')
+    if not env:
+        raise ValueError(
+            "ENVIRONMENT variable is not set. "
+            "This must be set to 'dev', 'stg', or 'prod'."
+        )
+    if env not in ['dev', 'stg', 'prod']:
+        raise ValueError(
+            f"Invalid ENVIRONMENT value: '{env}'. "
+            f"Must be one of: 'dev', 'stg', 'prod'."
+        )
+    return env
+
+
 # Image tag logic: prod environment uses 'main' tags, others use environment name
 def get_image_tag():
-    env = os.getenv('ENVIRONMENT')
+    env = get_environment()
     return 'main' if env == 'prod' else env
+
 
 # Global K8s job configuration for ML workloads
 def get_base_k8s_config():
-    env = os.getenv('ENVIRONMENT')
+    env = get_environment()
     return {
         "namespace": "ai-ml",
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
