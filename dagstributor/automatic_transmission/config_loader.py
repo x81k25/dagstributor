@@ -3,9 +3,20 @@ import yaml
 from pathlib import Path
 
 
+def _get_environment():
+    """Get and validate ENVIRONMENT variable."""
+    env = os.environ.get('ENVIRONMENT')
+    if not env:
+        raise ValueError(
+            "ENVIRONMENT variable is not set. "
+            "This must be set to 'dev', 'stg', or 'prod'."
+        )
+    return env
+
+
 # Load configuration at module level for use in decorators
 def _load_config():
-    environment = os.getenv('ENVIRONMENT', 'dev')
+    environment = _get_environment()
     config_dir = Path(__file__).parent.parent.parent / 'config' / 'schedules'
     
     # Load environment-specific configuration
