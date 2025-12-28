@@ -7,6 +7,10 @@ import sys
 import os
 from pathlib import Path
 
+# Set ENVIRONMENT before any dagstributor imports (required for module initialization)
+if 'ENVIRONMENT' not in os.environ:
+    os.environ['ENVIRONMENT'] = 'dev'
+
 # Add the dagstributor module to Python path
 # Since this script is now in tests/, we need to go up one level
 sys.path.insert(0, str(Path(__file__).parent.parent))

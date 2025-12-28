@@ -2,6 +2,11 @@
 Shared pytest fixtures for wiring_schema_tics tests.
 """
 import os
+
+# Set ENVIRONMENT before any dagstributor imports (required for module initialization)
+if 'ENVIRONMENT' not in os.environ:
+    os.environ['ENVIRONMENT'] = 'dev'
+
 import pytest
 from pathlib import Path
 from unittest.mock import patch
