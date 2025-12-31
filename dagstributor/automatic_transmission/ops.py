@@ -1,5 +1,12 @@
 """Kubernetes container execution ops for automatic transmission pipeline."""
 
+# Suppress BetaWarning before importing dagster modules
+# Must be done before any dagster imports per:
+# https://docs.dagster.io/api/api-lifecycle/filtering-api-lifecycle-warnings
+import warnings
+from dagster import BetaWarning
+warnings.filterwarnings("ignore", category=BetaWarning)
+
 import os
 from dagster import op, OpExecutionContext
 from dagster_k8s import k8s_job_op
