@@ -193,6 +193,11 @@ The wiring_schema_tics module requires the following PostgreSQL environment vari
 ### Kubernetes Configuration
 
 The Automatic Transmission jobs use the following Kubernetes resources:
+
+#### Run Configuration (K8s Manifests)
+The following settings are configured in k8s-manifests `run_k8s_config.container_config`:
+- `imagePullPolicy: Always` - Ensures fresh images are always pulled for job pods
+- `PYTHONWARNINGS: ignore::dagster.BetaWarning` - Suppresses beta API warnings in logs
  
 #### ConfigMaps
 - `at-config` - AT-specific configuration settings

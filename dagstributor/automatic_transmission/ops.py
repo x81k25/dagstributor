@@ -1,11 +1,7 @@
 """Kubernetes container execution ops for automatic transmission pipeline."""
 
 import os
-import warnings
-from dagster import op, OpExecutionContext, BetaWarning
-
-warnings.filterwarnings("ignore", category=BetaWarning)
-
+from dagster import op, OpExecutionContext
 from dagster_k8s import k8s_job_op
 
 

@@ -1,9 +1,6 @@
 """Central Dagster definitions for the dagstributor project."""
 
-import warnings
-from dagster import Definitions, EnvVar, BetaWarning
-
-warnings.filterwarnings("ignore", category=BetaWarning)
+from dagster import Definitions, EnvVar
 from dagstributor.resources import postgres_resource
 
 # All assets have been removed
