@@ -1,7 +1,11 @@
 """Kubernetes container execution ops for automatic transmission pipeline."""
 
 import os
-from dagster import op, OpExecutionContext
+import warnings
+from dagster import op, OpExecutionContext, BetaWarning
+
+warnings.filterwarnings("ignore", category=BetaWarning)
+
 from dagster_k8s import k8s_job_op
 
 
@@ -34,7 +38,6 @@ def get_base_k8s_config():
     return {
         "namespace": f"media-{env}",
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
-        "image_pull_policy": "Always",
         "env_config_maps": [
             "at-config",
             "environment",
