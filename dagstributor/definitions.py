@@ -1,5 +1,12 @@
 """Central Dagster definitions for the dagstributor project."""
 
+# Suppress BetaWarning before importing dagster modules
+# Must be done before any dagster imports per:
+# https://docs.dagster.io/api/api-lifecycle/filtering-api-lifecycle-warnings
+import warnings
+from dagster import BetaWarning
+warnings.filterwarnings("ignore", category=BetaWarning)
+
 from dagster import Definitions, EnvVar
 from dagstributor.resources import postgres_resource
 
