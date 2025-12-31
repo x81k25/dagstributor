@@ -166,7 +166,7 @@ at_09_transfer_op = k8s_job_op.configured(
                     "read_only": False
                 },
                 {
-                    "name": "movie-volume", 
+                    "name": "movie-volume",
                     "mount_path": MOVIE_DIR,
                     "read_only": False
                 },
