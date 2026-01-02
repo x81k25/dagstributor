@@ -36,6 +36,7 @@ def get_base_k8s_config_cpu():
     env = get_environment()
     return {
         "namespace": "ai-ml",
+        "service_account_name": "default",  # Use default SA in ai-ml namespace
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
         "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
         "env_config_maps": [
@@ -70,6 +71,7 @@ def get_base_k8s_config_gpu():
     env = get_environment()
     return {
         "namespace": "ai-ml",
+        "service_account_name": "default",  # Use default SA in ai-ml namespace
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
         "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
         "env_config_maps": [
