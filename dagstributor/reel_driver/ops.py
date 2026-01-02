@@ -85,7 +85,7 @@ def get_base_k8s_config_gpu():
         "container_config": {
             "resources": {
                 "limits": {
-                    "cpu": "8",
+                    "cpu": "4",
                     "memory": "8Gi",
                     "nvidia.com/gpu": "1"
                 },
@@ -98,7 +98,7 @@ def get_base_k8s_config_gpu():
             "env": [
                 {
                     "name": "NVIDIA_VISIBLE_DEVICES",
-                    "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"  # RTX 3060 UUID
+                    "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"
                 }
             ]
         },
