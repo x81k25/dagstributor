@@ -34,7 +34,8 @@ from dagstributor.test_jobs.jobs import (
     test_timeout_conditions_job,
 )
 from dagstributor.reel_driver.jobs import (
-    reel_driver_training_job,
+    reel_driver_training_cpu_job,
+    reel_driver_training_gpu_job,
     reel_driver_review_all_job,
 )
 from dagstributor.automatic_transmission.schedules import (
@@ -88,7 +89,8 @@ test_jobs = [
 
 # Define reel-driver jobs
 reel_driver_jobs = [
-    reel_driver_training_job,
+    reel_driver_training_cpu_job,
+    reel_driver_training_gpu_job,
     reel_driver_review_all_job,
 ]
 

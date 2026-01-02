@@ -11,25 +11,42 @@ JOB_CONFIG = {
 }
 
 from .ops import (
-    reel_driver_training_feature_engineering_op,
-    reel_driver_model_training_op,
+    reel_driver_feature_engineering_cpu_op,
+    reel_driver_model_training_cpu_op,
+    reel_driver_feature_engineering_gpu_op,
+    reel_driver_model_training_gpu_op,
     reel_driver_review_all_op,
 )
 
 
 @job(**JOB_CONFIG)
-def reel_driver_training_job():
-    """Complete Reel Driver training pipeline - runs feature engineering then model training sequentially.
-    
-    This job runs the reel-driver training pipeline:
-    1. Training Feature Engineering
-    2. Model Training
-    
+def reel_driver_training_cpu_job():
+    """Reel Driver CPU training pipeline - runs feature engineering then model training sequentially.
+
+    This job runs the reel-driver training pipeline on CPU:
+    1. Feature Engineering (CPU)
+    2. Model Training (CPU)
+
     The pipeline will fail fast - if feature engineering fails, model training will not run.
+    This job is available on-demand only (no schedule).
     """
-    # Chain ops sequentially - model training waits for feature engineering to complete
-    feature_engineering = reel_driver_training_feature_engineering_op()
-    reel_driver_model_training_op(feature_engineering)
+    feature_engineering = reel_driver_feature_engineering_cpu_op()
+    reel_driver_model_training_cpu_op(feature_engineering)
+
+
+@job(**JOB_CONFIG)
+def reel_driver_training_gpu_job():
+    """Reel Driver GPU training pipeline - runs feature engineering then model training sequentially.
+
+    This job runs the reel-driver training pipeline on GPU (RTX 3060):
+    1. Feature Engineering (GPU)
+    2. Model Training (GPU)
+
+    The pipeline will fail fast - if feature engineering fails, model training will not run.
+    This job runs on the scheduled training timeslot.
+    """
+    feature_engineering = reel_driver_feature_engineering_gpu_op()
+    reel_driver_model_training_gpu_op(feature_engineering)
 
 
 @job(**JOB_CONFIG)

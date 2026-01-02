@@ -31,8 +31,8 @@ def get_image_tag():
     return 'main' if env == 'prod' else env
 
 
-# Global K8s job configuration for ML workloads
-def get_base_k8s_config():
+# Global K8s job configuration for CPU ML workloads
+def get_base_k8s_config_cpu():
     env = get_environment()
     return {
         "namespace": "ai-ml",
@@ -65,28 +65,99 @@ def get_base_k8s_config():
     }
 
 
-reel_driver_training_feature_engineering_op = k8s_job_op.configured(
-    {
-        **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering:{get_image_tag()}",
+# Global K8s job configuration for GPU ML workloads (RTX 3060)
+def get_base_k8s_config_gpu():
+    env = get_environment()
+    return {
+        "namespace": "ai-ml",
+        "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
+        "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
+        "env_config_maps": [
+            f"reel-driver-config-{env}",
+            f"reel-driver-training-config-{env}"
+        ],
+        "env_secrets": [
+            f"reel-driver-secrets-{env}",
+            f"reel-driver-training-secrets-{env}"
+        ],
         "container_config": {
-            **get_base_k8s_config()["container_config"],
-            "name": "reel-driver-feature-engineering"
+            "resources": {
+                "limits": {
+                    "cpu": "8",
+                    "memory": "8Gi",
+                    "nvidia.com/gpu": "1"
+                },
+                "requests": {
+                    "cpu": "2",
+                    "memory": "2Gi",
+                    "nvidia.com/gpu": "1"
+                }
+            },
+            "env": [
+                {
+                    "name": "NVIDIA_VISIBLE_DEVICES",
+                    "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"  # RTX 3060 UUID
+                }
+            ]
+        },
+        "pod_spec_config": {
+            "runtime_class_name": "nvidia"
+        },
+        "job_spec_config": {
+            "activeDeadlineSeconds": 43200,  # 12 hours timeout for ML workloads
+            "backoffLimit": 1  # Allow 1 retry for transient failures
+        },
+    }
+
+
+# CPU ops
+reel_driver_feature_engineering_cpu_op = k8s_job_op.configured(
+    {
+        **get_base_k8s_config_cpu(),
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering-cpu:{get_image_tag()}",
+        "container_config": {
+            **get_base_k8s_config_cpu()["container_config"],
+            "name": "reel-driver-feature-engineering-cpu"
         }
     },
-    name="reel_driver_training_feature_engineering_op"
+    name="reel_driver_feature_engineering_cpu_op"
 )
 
-reel_driver_model_training_op = k8s_job_op.configured(
+reel_driver_model_training_cpu_op = k8s_job_op.configured(
     {
-        **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training:{get_image_tag()}",
+        **get_base_k8s_config_cpu(),
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training-cpu:{get_image_tag()}",
         "container_config": {
-            **get_base_k8s_config()["container_config"],
-            "name": "reel-driver-model-training"
+            **get_base_k8s_config_cpu()["container_config"],
+            "name": "reel-driver-model-training-cpu"
         }
     },
-    name="reel_driver_model_training_op"
+    name="reel_driver_model_training_cpu_op"
+)
+
+# GPU ops (RTX 3060)
+reel_driver_feature_engineering_gpu_op = k8s_job_op.configured(
+    {
+        **get_base_k8s_config_gpu(),
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-feature-engineering-gpu:{get_image_tag()}",
+        "container_config": {
+            **get_base_k8s_config_gpu()["container_config"],
+            "name": "reel-driver-feature-engineering-gpu"
+        }
+    },
+    name="reel_driver_feature_engineering_gpu_op"
+)
+
+reel_driver_model_training_gpu_op = k8s_job_op.configured(
+    {
+        **get_base_k8s_config_gpu(),
+        "image": f"ghcr.io/x81k25/reel-driver/reel-driver-model-training-gpu:{get_image_tag()}",
+        "container_config": {
+            **get_base_k8s_config_gpu()["container_config"],
+            "name": "reel-driver-model-training-gpu"
+        }
+    },
+    name="reel_driver_model_training_gpu_op"
 )
 
 
