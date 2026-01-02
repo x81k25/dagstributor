@@ -36,9 +36,8 @@ def get_base_k8s_config_cpu():
     env = get_environment()
     return {
         "namespace": "ai-ml",
-        "service_account_name": "default",  # Use default SA in ai-ml namespace
+        "service_account_name": "default",
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
-        "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
         "env_config_maps": [
             f"reel-driver-config-{env}",
             f"reel-driver-training-config-{env}"
@@ -57,7 +56,10 @@ def get_base_k8s_config_cpu():
                     "cpu": "2",
                     "memory": "2Gi"
                 }
-            }
+            },
+            "env": [
+                {"name": "ENVIRONMENT", "value": env}
+            ]
         },
         "job_spec_config": {
             "activeDeadlineSeconds": 43200,  # 12 hours timeout for ML workloads
@@ -71,9 +73,8 @@ def get_base_k8s_config_gpu():
     env = get_environment()
     return {
         "namespace": "ai-ml",
-        "service_account_name": "default",  # Use default SA in ai-ml namespace
+        "service_account_name": "default",
         "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
-        "env_vars": ["ENVIRONMENT"],  # Pass environment from Dagster process context
         "env_config_maps": [
             f"reel-driver-config-{env}",
             f"reel-driver-training-config-{env}"
@@ -96,10 +97,8 @@ def get_base_k8s_config_gpu():
                 }
             },
             "env": [
-                {
-                    "name": "NVIDIA_VISIBLE_DEVICES",
-                    "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"
-                }
+                {"name": "ENVIRONMENT", "value": env},
+                {"name": "NVIDIA_VISIBLE_DEVICES", "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"}
             ]
         },
         "pod_spec_config": {
