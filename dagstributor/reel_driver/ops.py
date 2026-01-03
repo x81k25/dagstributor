@@ -58,7 +58,8 @@ def get_base_k8s_config_cpu():
                 }
             },
             "env": [
-                {"name": "ENVIRONMENT", "value": env}
+                {"name": "ENVIRONMENT", "value": env},
+                {"name": "TRAINING_VARIANT", "value": "cpu"}
             ]
         },
         "job_spec_config": {
@@ -98,6 +99,7 @@ def get_base_k8s_config_gpu():
             },
             "env": [
                 {"name": "ENVIRONMENT", "value": env},
+                {"name": "TRAINING_VARIANT", "value": "gpu"},
                 {"name": "NVIDIA_VISIBLE_DEVICES", "value": "GPU-cfbe0295-2bfb-12c9-1bc9-b3b4833f2e18"}
             ]
         },
