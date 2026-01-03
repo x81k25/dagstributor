@@ -48,8 +48,7 @@ CONFIG = _load_config()
 # List to collect schedules that should be exposed
 schedules = []
 
-# GPU training schedule - takes the existing scheduled timeslot
-# Note: CPU training job is on-demand only (no schedule)
+# GPU training schedule
 @schedule(
     job=reel_driver_training_gpu_job,
     cron_schedule=CONFIG["schedules"]["reel_driver_training_gpu"]["cron_schedule"],
@@ -61,6 +60,20 @@ def reel_driver_training_gpu_schedule():
     return {}
 
 schedules.append(reel_driver_training_gpu_schedule)
+
+# CPU training schedule - only in dev and stg
+if "reel_driver_training_cpu" in CONFIG["schedules"]:
+    @schedule(
+        job=reel_driver_training_cpu_job,
+        cron_schedule=CONFIG["schedules"]["reel_driver_training_cpu"]["cron_schedule"],
+        name="reel_driver_training_cpu_schedule",
+        default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_cpu"]["default_status"])
+    )
+    def reel_driver_training_cpu_schedule():
+        """Reel Driver CPU training pipeline - scheduled on Tuesdays (dev), Wednesdays (stg)."""
+        return {}
+
+    schedules.append(reel_driver_training_cpu_schedule)
 
 # Conditionally create review_all schedule only if it exists in config
 if "reel_driver_review_all" in CONFIG["schedules"]:

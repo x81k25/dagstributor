@@ -71,3 +71,8 @@ schedules:
     enabled: true
     cron_schedule: "0 2 * * 7"  # Saturdays at 21:00 CDT
     default_status: "RUNNING"
+
+  reel_driver_training_cpu:
+    enabled: true
+    cron_schedule: "0 2 * * 4"  # Wednesdays at 21:00 CDT
+    default_status: "RUNNING"
