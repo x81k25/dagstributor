@@ -5,7 +5,7 @@ import yaml
 from pathlib import Path
 from dagster import schedule, DefaultScheduleStatus
 
-from .jobs import reel_driver_training_job, reel_driver_review_all_job
+from .jobs import reel_driver_training_gpu_job, reel_driver_training_cpu_job, reel_driver_review_all_job
 
 
 def _get_environment():
@@ -48,18 +48,19 @@ CONFIG = _load_config()
 # List to collect schedules that should be exposed
 schedules = []
 
-# Always create training schedule as it exists in all environments
+# GPU training schedule - takes the existing scheduled timeslot
+# Note: CPU training job is on-demand only (no schedule)
 @schedule(
-    job=reel_driver_training_job,
-    cron_schedule=CONFIG["schedules"]["reel_driver_training"]["cron_schedule"],
-    name="reel_driver_training_schedule",
-    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training"]["default_status"])
+    job=reel_driver_training_gpu_job,
+    cron_schedule=CONFIG["schedules"]["reel_driver_training_gpu"]["cron_schedule"],
+    name="reel_driver_training_gpu_schedule",
+    default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_gpu"]["default_status"])
 )
-def reel_driver_training_schedule():
-    """Reel Driver training pipeline runs daily at 06:00 (dev) or 07:00 (stg)."""
+def reel_driver_training_gpu_schedule():
+    """Reel Driver GPU training pipeline - scheduled on Fridays (dev), Saturdays (stg), Sundays (prod)."""
     return {}
 
-schedules.append(reel_driver_training_schedule)
+schedules.append(reel_driver_training_gpu_schedule)
 
 # Conditionally create review_all schedule only if it exists in config
 if "reel_driver_review_all" in CONFIG["schedules"]:

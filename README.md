@@ -25,12 +25,22 @@ Sequential data processing pipeline:
 10. **at_10_cleanup_job** - Removes temporary files and data
 11. **at_full_pipeline_job** - Executes the complete pipeline sequence
 
-### Reel Driver Pipeline (2 jobs)
+### Reel Driver Pipeline (3 jobs)
 
 Machine learning pipeline for media recommendation and classification:
-1. **reel_driver_training_feature_engineering_op** - Processes training data and creates engineered features
-2. **reel_driver_model_training_op** - Trains XGBoost models and stores in MLflow registry
-3. **reel_driver_training_job** - Complete ML pipeline combining both operations
+
+**CPU Ops:**
+- **reel_driver_feature_engineering_cpu_op** - CPU-based feature engineering
+- **reel_driver_model_training_cpu_op** - CPU-based model training
+
+**GPU Ops (RTX 3060):**
+- **reel_driver_feature_engineering_gpu_op** - GPU-accelerated feature engineering
+- **reel_driver_model_training_gpu_op** - GPU-accelerated model training
+
+**Jobs:**
+1. **reel_driver_training_cpu_job** - CPU training pipeline (on-demand only)
+2. **reel_driver_training_gpu_job** - GPU training pipeline (scheduled)
+3. **reel_driver_review_all_job** - Resets reviewed flag for training records
 
 ### Wiring Schema Tics (6 jobs)
 
@@ -263,8 +273,11 @@ dagster job list -f repositories/main.py
 # Execute a specific job
 dagster job execute -f repositories/main.py -j at_01_rss_ingest_job
 
-# Execute reel driver ML jobs
-dagster job execute -f repositories/main.py -j reel_driver_training_job
+# Execute reel driver ML jobs (GPU - scheduled)
+dagster job execute -f repositories/main.py -j reel_driver_training_gpu_job
+
+# Execute reel driver ML jobs (CPU - on-demand)
+dagster job execute -f repositories/main.py -j reel_driver_training_cpu_job
 
 # Execute wiring schema tics jobs
 dagster job execute -f repositories/main.py -j test_db_connection_job
