@@ -67,7 +67,7 @@ schedules:
     cron_schedule: "0 10 * * *"  # daily at 05:00 CDT
     default_status: "RUNNING"
 
-  reel_driver_training:
+  reel_driver_training_gpu:
     enabled: true
     cron_schedule: "0 2 * * 7"  # Saturdays at 21:00 CDT
     default_status: "RUNNING"
