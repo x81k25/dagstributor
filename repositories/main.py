@@ -19,7 +19,6 @@ from dagstributor.automatic_transmission.jobs import (
 from dagstributor.wiring_schema_tics.jobs import (
     wst_atp_bak_job,
     wst_atp_reload_job,
-    wst_atp_sync_media_to_training_job,
 )
 from dagstributor.test_jobs.jobs import (
     test_db_connection_job,
@@ -44,7 +43,6 @@ from dagstributor.automatic_transmission.schedules import (
 )
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
-    wst_atp_sync_media_to_training_schedule,
 )
 from dagstributor.reel_driver.schedules import schedules as reel_driver_schedules
 
@@ -68,7 +66,6 @@ def dagstributor_repo():
         # Wiring schema-tics (wst) jobs
         wst_atp_bak_job,
         wst_atp_reload_job,
-        wst_atp_sync_media_to_training_job,
         # Test jobs
         test_db_connection_job,
         test_timeout_conditions_job,
@@ -89,5 +86,4 @@ def dagstributor_repo():
         at_10_cleanup_schedule,
         # Wiring schema-tics schedules
         wst_atp_bak_schedule,
-        wst_atp_sync_media_to_training_schedule,
     ] + reel_driver_schedules  # Add reel driver schedules dynamically
