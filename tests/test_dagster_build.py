@@ -78,8 +78,7 @@ def test_job_definitions():
         ]
         
         expected_wst_jobs = [
-            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_reload_job",
-            "wst_atp_sync_media_to_training_job"
+            "test_db_connection_job", "wst_atp_bak_job", "wst_atp_reload_job"
         ]
         
         expected_test_jobs = [
@@ -141,16 +140,14 @@ def test_op_configurations():
         
         from dagstributor.wiring_schema_tics.ops import (
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
-            wst_atp_sync_media_to_training_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op
         )
         
         from dagstributor.test_jobs.ops import test_db_connection_op, test_timeout_conditions_op
         
         wst_ops = [
             wst_atp_bak_media_op, wst_atp_bak_prediction_op, wst_atp_bak_training_op,
-            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op,
-            wst_atp_sync_media_to_training_op
+            wst_atp_reload_media_op, wst_atp_reload_training_op, wst_atp_reload_prediction_op
         ]
         
         test_ops = [

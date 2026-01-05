@@ -52,7 +52,6 @@ from dagstributor.automatic_transmission.schedules import (
 )
 from dagstributor.wiring_schema_tics.schedules import (
     wst_atp_bak_schedule,
-    wst_atp_sync_media_to_training_schedule,
 )
 from dagstributor.reel_driver.schedules import schedules as reel_driver_env_schedules
 
@@ -111,7 +110,6 @@ at_schedules = [
 # Define wiring schema-tics schedules
 wst_schedules = [
     wst_atp_bak_schedule,
-    wst_atp_sync_media_to_training_schedule,
 ]
 
 # Define test schedules

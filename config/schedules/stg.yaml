@@ -57,11 +57,6 @@ schedules:
     cron_schedule: "57 9 1 * *"  # monthly on 1st at 04:57 CDT
     default_status: "RUNNING"
     
-  wst_atp_sync_media_to_training:
-    enabled: true
-    cron_schedule: "0 8 * * 1"  # weekly on Monday at 03:00 CDT
-    default_status: "RUNNING"
-    
   reel_driver_review_all:
     enabled: true
     cron_schedule: "0 10 * * *"  # daily at 05:00 CDT
