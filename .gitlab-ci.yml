@@ -1,0 +1,43 @@
+stages:
+  - test
+  - build
+
+# Test stage - validates dagster build before containerization
+test:
+  stage: test
+  tags:
+    - k8s
+    - docker
+  image: python:3.12-slim
+  variables:
+    ENVIRONMENT: "dev"
+    DAGSTER_HOME: "/builds"
+  before_script:
+    - pip install --no-cache-dir -r requirements.txt
+  script:
+    - python tests/test_dagster_build.py
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+
+# Build stage - build and push container image
+build:
+  stage: build
+  tags:
+    - k8s
+    - docker
+  needs:
+    - test
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+      --destination "${CI_REGISTRY_IMAGE}:sha-${CI_COMMIT_SHORT_SHA}"
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/

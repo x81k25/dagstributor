@@ -40,7 +40,7 @@ def get_base_k8s_config():
     env = get_environment()
     return {
         "namespace": f"media-{env}",
-        "image_pull_secrets": [{"name": "ghcr-pull-image-secret"}],
+        "image_pull_secrets": [{"name": "gitlab-registry"}],
         "env_config_maps": [
             "at-config",
             "environment",
@@ -65,7 +65,7 @@ def get_base_k8s_config():
 at_01_rss_ingest_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-01-rss-ingest:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-01-rss-ingest:{get_image_tag()}",
         "container_config": {
             "name": "at-01-rss-ingest"
         }
@@ -76,7 +76,7 @@ at_01_rss_ingest_op = k8s_job_op.configured(
 at_02_collect_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-02-collect:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-02-collect:{get_image_tag()}",
         "container_config": {
             "name": "at-02-collect"
         }
@@ -87,7 +87,7 @@ at_02_collect_op = k8s_job_op.configured(
 at_03_parse_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-03-parse:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-03-parse:{get_image_tag()}",
         "container_config": {
             "name": "at-03-parse"
         }
@@ -98,7 +98,7 @@ at_03_parse_op = k8s_job_op.configured(
 at_04_file_filtration_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-04-file-filtration:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-04-file-filtration:{get_image_tag()}",
         "container_config": {
             "name": "at-04-file-filtration"
         }
@@ -109,7 +109,7 @@ at_04_file_filtration_op = k8s_job_op.configured(
 at_05_metadata_collection_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-05-metadata-collection:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-05-metadata-collection:{get_image_tag()}",
         "container_config": {
             "name": "at-05-metadata-collection"
         }
@@ -120,7 +120,7 @@ at_05_metadata_collection_op = k8s_job_op.configured(
 at_06_media_filtration_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-06-media-filtration:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-06-media-filtration:{get_image_tag()}",
         "container_config": {
             "name": "at-06-media-filtration"
         }
@@ -131,7 +131,7 @@ at_06_media_filtration_op = k8s_job_op.configured(
 at_07_initiation_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-07-initiation:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-07-initiation:{get_image_tag()}",
         "container_config": {
             "name": "at-07-initiation"
         }
@@ -142,7 +142,7 @@ at_07_initiation_op = k8s_job_op.configured(
 at_08_download_check_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-08-download-check:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-08-download-check:{get_image_tag()}",
         "container_config": {
             "name": "at-08-download-check"
         }
@@ -158,7 +158,7 @@ TV_SHOW_DIR = os.getenv('AT_TV_SHOW_DIR')
 at_09_transfer_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-09-transfer:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-09-transfer:{get_image_tag()}",
         "job_spec_config": {
             "activeDeadlineSeconds": 600,  # 10 minutes for transfer operations
             "backoffLimit": 0
@@ -216,7 +216,7 @@ at_09_transfer_op = k8s_job_op.configured(
 at_10_cleanup_op = k8s_job_op.configured(
     {
         **get_base_k8s_config(),
-        "image": f"ghcr.io/x81k25/automatic-transmission/at-10-cleanup:{get_image_tag()}",
+        "image": f"192.168.50.2:5050/media/at/at-10-cleanup:{get_image_tag()}",
         "container_config": {
             "name": "at-10-cleanup"
         }
