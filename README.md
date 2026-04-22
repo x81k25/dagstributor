@@ -112,7 +112,6 @@ dagstributor/
 ├── config/
 │   └── schedules/               # Environment-specific schedule configs
 │       ├── dev.yaml             # Development schedule settings
-│       ├── stg.yaml             # Staging schedule settings
 │       └── prod.yaml            # Production schedule settings
 ├── dagstributor/
 │   ├── automatic_transmission/  # Automatic Transmission pipeline (11 jobs)
@@ -165,8 +164,7 @@ This ensures:
 The system is deployed via Docker images with automatic GitOps workflows:
 
 #### Branch-Environment Mapping
-- **dev** branch → Development environment 
-- **stg** branch → Staging environment
+- **dev** branch → Development environment
 - **main** branch → Production environment
 
 #### Automated Pipeline
@@ -177,7 +175,7 @@ The system is deployed via Docker images with automatic GitOps workflows:
 5. **ArgoCD Deployment** → Automatically updates Kubernetes manifests and deploys
 
 #### Image Tags
-- **Branch tag**: `ghcr.io/x81k25/dagstributor:dev|stg|main`
+- **Branch tag**: `ghcr.io/x81k25/dagstributor:dev|main`
 - **SHA tag**: `ghcr.io/x81k25/dagstributor:sha-<7-char-commit>`
 
 #### Validation Tests
@@ -297,7 +295,6 @@ dagster job execute -f repositories/main.py -j at_01_rss_ingest_job -c config.ya
 
 The application runs on Kubernetes with different namespaces per environment:
 - `media-dev` - Development namespace
-- `media-stg` - Staging namespace
 - `media-prod` - Production namespace
 
 ### Accessing Deployed Instances
@@ -320,9 +317,6 @@ kubectl exec -n media-dev <dagster-pod> -c dagster-dagit -- sh -c \
 ```bash
 # Restart development pod
 kubectl delete pod -n media-dev $(kubectl get pods -n media-dev | grep dagster | awk '{print $1}')
-
-# Restart staging pod  
-kubectl delete pod -n media-stg $(kubectl get pods -n media-stg | grep dagster | awk '{print $1}')
 
 # Restart production pod
 kubectl delete pod -n media-prod $(kubectl get pods -n media-prod | grep dagster | awk '{print $1}')
@@ -367,7 +361,6 @@ pytest tests/test_ops.py
 
 1. **Branch Strategy**:
    - `dev` - Active development
-   - `stg` - Staging releases
    - `main` - Production releases
 
 2. **Code Style**:
@@ -386,7 +379,6 @@ pytest tests/test_ops.py
 
 The repository uses GitHub Actions for CI/CD with automatic deployments:
 - Push to `dev` → Deploy to development
-- Push to `stg` → Deploy to staging
 - Push to `main` → Deploy to production
 
 ## Monitoring
