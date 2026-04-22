@@ -1,7 +1,7 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|main)$/
 
 stages:
   - test
@@ -27,7 +27,7 @@ test:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # Build stage - build and push container image
-# Runs on push to dev/stg/main
+# Runs on push to dev/main
 build:
   stage: build
   tags:
@@ -46,7 +46,7 @@ build:
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
       --destination "${CI_REGISTRY_IMAGE}:sha-${CI_COMMIT_SHORT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|main)$/
 
 # Deploy-test template
 .deploy-test:
@@ -103,18 +103,6 @@ deploy-test-dev:
     SERVICE_PORT: "3000"
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
-
-# Deploy-test for stg
-deploy-test-stg:
-  extends: .deploy-test
-  resource_group: dagstributor-stg
-  variables:
-    DEPLOYMENT: "dagster-stg"
-    NAMESPACE: "media-stg"
-    SERVICE_HOST: "dagster-stg.media-stg.svc.cluster.local"
-    SERVICE_PORT: "3000"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "stg"
 
 # Deploy-test for prod
 deploy-test-prod:

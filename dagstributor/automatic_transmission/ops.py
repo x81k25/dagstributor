@@ -18,12 +18,12 @@ def get_environment():
     if not env:
         raise ValueError(
             "ENVIRONMENT variable is not set. "
-            "This must be set to 'dev', 'stg', or 'prod'."
+            "This must be set to 'dev' or 'prod'."
         )
-    if env not in ['dev', 'stg', 'prod']:
+    if env not in ['dev', 'prod']:
         raise ValueError(
             f"Invalid ENVIRONMENT value: '{env}'. "
-            f"Must be one of: 'dev', 'stg', 'prod'."
+            f"Must be one of: 'dev', 'prod'."
         )
     return env
 

@@ -14,7 +14,7 @@ def _get_environment():
     if not env:
         raise ValueError(
             "ENVIRONMENT variable is not set. "
-            "This must be set to 'dev', 'stg', or 'prod'."
+            "This must be set to 'dev' or 'prod'."
         )
     return env
 
@@ -56,12 +56,12 @@ schedules = []
     default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_gpu"]["default_status"])
 )
 def reel_driver_training_gpu_schedule():
-    """Reel Driver GPU training pipeline - scheduled on Fridays (dev), Saturdays (stg), Sundays (prod)."""
+    """Reel Driver GPU training pipeline - scheduled on Fridays (dev), Sundays (prod)."""
     return {}
 
 schedules.append(reel_driver_training_gpu_schedule)
 
-# CPU training schedule - only in dev and stg
+# CPU training schedule - only in dev
 if "reel_driver_training_cpu" in CONFIG["schedules"]:
     @schedule(
         job=reel_driver_training_cpu_job,
@@ -70,7 +70,7 @@ if "reel_driver_training_cpu" in CONFIG["schedules"]:
         default_status=getattr(DefaultScheduleStatus, CONFIG["schedules"]["reel_driver_training_cpu"]["default_status"])
     )
     def reel_driver_training_cpu_schedule():
-        """Reel Driver CPU training pipeline - scheduled on Tuesdays (dev), Wednesdays (stg)."""
+        """Reel Driver CPU training pipeline - scheduled on Tuesdays (dev)."""
         return {}
 
     schedules.append(reel_driver_training_cpu_schedule)
